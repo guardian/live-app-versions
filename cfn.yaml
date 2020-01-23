@@ -16,6 +16,9 @@ Parameters:
       - CODE
       - PROD
     Default: CODE
+  AppleAppId:
+    Description: The Apple id of the iOS app which will be polled against
+    Type: String
   DeployBucket:
     Description: Bucket where RiffRaff uploads artifacts on deploy
     Type: String
@@ -62,6 +65,7 @@ Resources:
           Stage: !Ref Stage
           Stack: !Ref Stack
           App: !Ref App
+          APPLE_APP_ID: !Ref AppleAppId
       Description: Lambda function which retrieves the latest beta version from App Store Connect.
       Handler: com.gu.liveappversions.Lambda::handler
       MemorySize: 128
