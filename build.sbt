@@ -2,7 +2,7 @@ name := "live-app-versions"
 
 organization := "com.gu"
 
-description:= "CHANGE_ME"
+description:= "Lambda function which retrieves the latest beta version from App Store Connect."
 
 version := "1.0"
 
