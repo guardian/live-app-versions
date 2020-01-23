@@ -33,6 +33,14 @@ libraryDependencies ++= Seq(
 enablePlugins(RiffRaffArtifact)
 
 assemblyJarName := s"${name.value}.jar"
+assemblyMergeStrategy in assembly := {
+  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+  case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.last
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
+
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
