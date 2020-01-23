@@ -73,8 +73,8 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       State: DISABLED
-      Description: Event sent to process the previous day of data
-      ScheduleExpression: cron(14 3 * * ? *)
+      Description: Triggers the lambda periodically, allowing us to check whether a new version has been released
+      ScheduleExpression: rate(5 minutes)
       Targets:
         - Id: Lambda
           Arn: !GetAtt Lambda.Arn
