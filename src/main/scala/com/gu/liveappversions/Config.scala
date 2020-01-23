@@ -18,7 +18,7 @@ object Config {
       Option(System.getenv("Stage")).getOrElse("DEV"))
   }
 
-  case class AppStoreConnectConfig(teamId: String, privateKeyId: String, issuerId: String, privateKey: ApnsSigningKey)
+  case class AppStoreConnectConfig(teamId: String, privateKeyId: String, issuerId: String, privateKey: ApnsSigningKey, appleAppId: String)
 
   object AppStoreConnectConfig {
     def apply(): AppStoreConnectConfig = {
@@ -31,7 +31,8 @@ object Config {
         privateKey = ApnsSigningKey.loadFromInputStream(
           new ByteArrayInputStream(System.getenv("APPSTORE_PRIVATE_KEY").getBytes(StandardCharsets.UTF_8)),
           teamId,
-          privateKeyId))
+          privateKeyId),
+        appleAppId = System.getenv("APPLE_APP_ID"))
     }
   }
 

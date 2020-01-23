@@ -28,8 +28,8 @@ object AppStoreConnectApi {
     latestBetaWithExternalTesters.flatMap(betaBuild => buildsResponse.data.find(_.id == betaBuild.id))
   }
 
-  def latestBuildWithExternalTesters(token: String): Option[BuildDetails] = {
-    val buildsQuery = "/builds?limit=20&sort=-version&include=buildBetaDetail&filter[app]=409128287"
+  def latestBuildWithExternalTesters(token: String, appStoreConnectConfig: AppStoreConnectConfig): Option[BuildDetails] = {
+    val buildsQuery = s"/builds?limit=20&sort=-version&include=buildBetaDetail&filter[app]=${appStoreConnectConfig.appleAppId}"
     val request = new Request.Builder()
       .url(s"$appStoreConnectBaseUrl$buildsQuery")
       .addHeader("Authorization", s"Bearer $token")
@@ -54,8 +54,9 @@ object Lambda {
   }
 
   def process(): Unit = {
-    val token = JwtTokenBuilder.buildToken(AppStoreConnectConfig())
-    val latestBuild = AppStoreConnectApi.latestBuildWithExternalTesters(token)
+    val appStoreConnectConfig = AppStoreConnectConfig()
+    val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
+    val latestBuild = AppStoreConnectApi.latestBuildWithExternalTesters(token, appStoreConnectConfig)
     println(latestBuild)
   }
 
