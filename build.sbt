@@ -34,8 +34,7 @@ enablePlugins(RiffRaffArtifact)
 
 assemblyJarName := s"${name.value}.jar"
 assemblyMergeStrategy in assembly := {
-  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-  case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.last
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
