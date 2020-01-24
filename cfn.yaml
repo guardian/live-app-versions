@@ -75,7 +75,7 @@ Resources:
           APPLE_APP_ID: !Ref AppleAppId
       Description: Lambda function which retrieves the latest beta version from App Store Connect.
       Handler: com.gu.liveappversions.Lambda::handler
-      MemorySize: 128
+      MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
       Timeout: 60
