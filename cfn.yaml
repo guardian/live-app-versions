@@ -52,7 +52,7 @@ Resources:
               Action:
                 - lambda:InvokeFunction
               Resource: "*"
-        - PolicyName: lambda
+        - PolicyName: privateConfiguration
           PolicyDocument:
             Statement:
               Effect: Allow
