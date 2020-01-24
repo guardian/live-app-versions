@@ -80,7 +80,7 @@ Resources:
       Runtime: java8
       Timeout: 60
 
-  DailyEvent:
+  PollingEvent:
     Type: AWS::Events::Rule
     Properties:
       State: DISABLED
@@ -90,10 +90,10 @@ Resources:
         - Id: Lambda
           Arn: !GetAtt Lambda.Arn
 
-  DailyEventLambdaPermission:
+  PollingEventLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt Lambda.Arn
       Principal: events.amazonaws.com
-      SourceArn: !GetAtt DailyEvent.Arn
+      SourceArn: !GetAtt PollingEvent.Arn
