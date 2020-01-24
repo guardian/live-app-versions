@@ -20,6 +20,7 @@ val circeVersion = "0.12.3"
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
+  "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.8.2",
   "com.pauldijou" %% "jwt-core" % "4.2.0",
   "com.squareup.okhttp3" % "okhttp" % "4.3.1",
