@@ -52,6 +52,13 @@ Resources:
               Action:
                 - lambda:InvokeFunction
               Resource: "*"
+        - PolicyName: lambda
+          PolicyDocument:
+            Statement:
+              Effect: Allow
+              Action:
+                - ssm:GetParametersByPath
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/${Stack}/${App}
   Lambda:
     Type: AWS::Lambda::Function
     Properties:
