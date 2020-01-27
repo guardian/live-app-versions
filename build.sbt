@@ -18,6 +18,7 @@ scalacOptions ++= Seq(
 val circeVersion = "0.12.3"
 
 libraryDependencies ++= Seq(
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.714",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
