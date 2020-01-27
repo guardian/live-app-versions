@@ -1,7 +1,5 @@
 package com.gu.liveappversions
 
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider }
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.turo.pushy.apns.auth.ApnsSigningKey
 import com.gu.AwsIdentity
 import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
@@ -31,14 +29,10 @@ object Config {
         app = env.app,
         stack = env.stack,
         stage = env.stage,
-        region = "eu-west-1")
-
-      val awsCredentials = new AWSCredentialsProviderChain(
-        new ProfileCredentialsProvider("mobile"), // Used when running locally
-        new EnvironmentVariableCredentialsProvider() // Used by AWS lambda
+        region = Aws.euWest.getName
       )
 
-      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), awsCredentials) {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
 
