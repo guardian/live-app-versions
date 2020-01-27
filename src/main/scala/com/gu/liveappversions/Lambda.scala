@@ -50,20 +50,14 @@ object Lambda {
   def handler(context: Context): Unit = {
     val env = Env()
     logger.info(s"Starting $env")
-    process()
+    process(env)
   }
 
-  def process(): Unit = {
-    val appStoreConnectConfig = AppStoreConnectConfig()
+  def process(env: Env): Unit = {
+    val appStoreConnectConfig = AppStoreConnectConfig(env)
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
     val latestBuild = AppStoreConnectApi.latestBuildWithExternalTesters(token, appStoreConnectConfig)
     println(latestBuild)
   }
 
-}
-
-object TestIt {
-  def main(args: Array[String]): Unit = {
-    Lambda.process()
-  }
 }

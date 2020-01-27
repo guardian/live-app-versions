@@ -1,0 +1,19 @@
+stacks: [mobile]
+regions: [eu-west-1]
+
+deployments:
+  live-app-versions:
+    type: aws-lambda
+    parameters:
+      bucket: mobile-dist
+      functionNames: [live-app-versions-]
+      fileName: live-app-versions.jar
+      prefixStack: false
+    dependencies: [live-app-versions-cfn]
+  live-app-versions-cfn:
+    type: cloud-formation
+    app: live-app-versions
+    parameters:
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: live-app-versions
+      templatePath: cfn.yaml

@@ -12,7 +12,7 @@ object JwtTokenBuilder {
     val header = new JwtHeader(
       algorithm = Some(JwtAlgorithm.ES256),
       typ = Some("typ"),
-      keyId = Some(appStoreConnectConfig.privateKeyId),
+      keyId = Some(appStoreConnectConfig.keyId),
       contentType = Some("application/json"))
     val claim = JwtClaim(
       issuer = Some(appStoreConnectConfig.issuerId),
