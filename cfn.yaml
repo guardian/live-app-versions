@@ -23,6 +23,12 @@ Parameters:
     Description: Bucket where RiffRaff uploads artifacts on deploy
     Type: String
     Default: mobile-dist
+Mappings:
+  StageVariables:
+    CODE:
+      UploadPath: reserved-paths/CODE/ios-live-app/
+    PROD:
+     UploadPath: reserved-paths/ios-live-app/
 Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -59,6 +65,16 @@ Resources:
               Action:
                 - ssm:GetParametersByPath
               Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/${Stack}/${App}
+        - PolicyName: uploadBuildOutputToS3
+          PolicyDocument:
+            Statement:
+              Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub
+                - arn:aws:s3:::static-content-dist/${Path}/*
+                - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
+
   Lambda:
     Type: AWS::Lambda::Function
     Properties:
