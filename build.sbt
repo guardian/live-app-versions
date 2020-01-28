@@ -39,6 +39,7 @@ enablePlugins(RiffRaffArtifact)
 assemblyJarName := s"${name.value}.jar"
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case "module-info.class" => MergeStrategy.discard //See: https://stackoverflow.com/a/55557287
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
