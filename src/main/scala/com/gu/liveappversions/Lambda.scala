@@ -3,45 +3,8 @@ package com.gu.liveappversions
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.liveappversions.Config.{ AppStoreConnectConfig, Env }
 import org.slf4j.{ Logger, LoggerFactory }
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import io.circe.parser._
 
-import scala.util.Try
-
-object AppStoreConnectApi {
-
-  import io.circe.generic.auto._
-
-  case class BuildAttributes(version: String)
-  case class BuildDetails(id: String, attributes: BuildAttributes)
-  case class BetaBuildAttributes(externalBuildState: String)
-  case class BetaBuildDetails(id: String, attributes: BetaBuildAttributes)
-
-  case class BuildsResponse(data: List[BuildDetails], included: List[BetaBuildDetails])
-
-  val client = new OkHttpClient
-  val appStoreConnectBaseUrl = "https://api.appstoreconnect.apple.com/v1"
-
-  def findLatestBuildWithExternalTesters(buildsResponse: BuildsResponse): Option[BuildDetails] = {
-    val latestBetaWithExternalTesters = buildsResponse.included.find(_.attributes.externalBuildState == "IN_BETA_TESTING")
-    latestBetaWithExternalTesters.flatMap(betaBuild => buildsResponse.data.find(_.id == betaBuild.id))
-  }
-
-  def latestBuildWithExternalTesters(token: String, appStoreConnectConfig: AppStoreConnectConfig): Option[BuildDetails] = {
-    val buildsQuery = s"/builds?limit=20&sort=-version&include=buildBetaDetail&filter[app]=${appStoreConnectConfig.appleAppId}"
-    val request = new Request.Builder()
-      .url(s"$appStoreConnectBaseUrl$buildsQuery")
-      .addHeader("Authorization", s"Bearer $token")
-      .build
-    for {
-      response <- Try(client.newCall(request).execute).toOption
-      parseAttempt <- decode[BuildsResponse](response.body().string()).toOption
-      build <- findLatestBuildWithExternalTesters(parseAttempt)
-    } yield build
-  }
-
-}
+import scala.util.{ Failure, Success }
 
 object Lambda {
 
@@ -50,14 +13,23 @@ object Lambda {
   def handler(context: Context): Unit = {
     val env = Env()
     logger.info(s"Starting $env")
-    process(env)
+    process(env, "static-content-dist")
   }
 
-  def process(env: Env): Unit = {
+  def process(env: Env, uploadBucketName: String): Unit = {
     val appStoreConnectConfig = AppStoreConnectConfig(env)
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
-    val latestBuild = AppStoreConnectApi.latestBuildWithExternalTesters(token, appStoreConnectConfig)
-    println(latestBuild)
+    val generateBuildOutputAttempt = for {
+      appStoreConnectResponse <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
+      buildOutput <- BuildOutput.fromAppStoreConnectResponse(appStoreConnectResponse)
+    } yield buildOutput
+    generateBuildOutputAttempt match {
+      case Success(buildOutput) =>
+        logger.info(s"The latest iOS beta with external beta testers is: ${buildOutput.latestReleasedBuild}. Previous versions are: ${buildOutput.previouslyReleasedBuilds}")
+        S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
+      case Failure(ex) => logger.error("Failed to retrieve the latest build information from App Store Connect...")
+    }
+
   }
 
 }

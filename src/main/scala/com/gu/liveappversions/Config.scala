@@ -29,10 +29,9 @@ object Config {
         app = env.app,
         stack = env.stack,
         stage = env.stage,
-        region = Aws.euWest.getName
-      )
+        region = Aws.euWest1.getName)
 
-      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials) {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
 
