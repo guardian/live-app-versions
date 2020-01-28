@@ -27,7 +27,7 @@ object Lambda {
       case Success(buildOutput) =>
         logger.info(s"The latest iOS beta with external beta testers is: ${buildOutput.latestReleasedBuild}. Previous versions are: ${buildOutput.previouslyReleasedBuilds}")
         S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
-      case Failure(ex) => logger.error("Failed to retrieve the latest build information from App Store Connect...")
+      case Failure(ex) => logger.error(s"Failed to retrieve the latest build information from App Store Connect due to: $ex")
     }
 
   }
