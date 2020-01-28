@@ -28,7 +28,7 @@ object BuildOutput {
     }
   }
 
-  def findLatestBuildWithExternalTesters(buildsResponse: BuildsResponse): Try[BuildOutput] = {
+  def findLatestBuildsWithExternalTesters(buildsResponse: BuildsResponse): Try[BuildOutput] = {
     val betasWithExternalTesters = buildsResponse.included.filter(_.attributes.externalBuildState == "IN_BETA_TESTING")
     for {
       latestBetaWithExternalTesters <- Try { buildAttributesForBuildDetails(betasWithExternalTesters.head.id, buildsResponse.data).get }
@@ -37,7 +37,7 @@ object BuildOutput {
   }
 
   def fromAppStoreConnectResponse(buildsResponse: BuildsResponse): Try[BuildOutput] = {
-    findLatestBuildWithExternalTesters(buildsResponse)
+    findLatestBuildsWithExternalTesters(buildsResponse)
   }
 
 }
