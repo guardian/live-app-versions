@@ -1,10 +1,9 @@
 package com.gu.liveappversions
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.s3.model.PutObjectResult
 import com.gu.liveappversions.Config.{ AppStoreConnectConfig, Env }
 import org.slf4j.{ Logger, LoggerFactory }
-
-import scala.util.{ Failure, Success }
 
 object Lambda {
 
@@ -16,20 +15,15 @@ object Lambda {
     process(env, "static-content-dist")
   }
 
-  def process(env: Env, uploadBucketName: String): Unit = {
+  def process(env: Env, uploadBucketName: String): PutObjectResult = {
     val appStoreConnectConfig = AppStoreConnectConfig(env)
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
-    val generateBuildOutputAttempt = for {
+    val attempt = for {
       appStoreConnectResponse <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
       buildOutput <- BuildOutput.fromAppStoreConnectResponse(appStoreConnectResponse)
-    } yield buildOutput
-    generateBuildOutputAttempt match {
-      case Success(buildOutput) =>
-        logger.info(s"The latest iOS beta with external beta testers is: ${buildOutput.latestReleasedBuild}. Previous versions are: ${buildOutput.previouslyReleasedBuilds}")
-        S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
-      case Failure(ex) => logger.error(s"Failed to retrieve the latest build information from App Store Connect due to: $ex")
-    }
-
+      uploadAttempt <- S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
+    } yield uploadAttempt
+    attempt.get // This will throw an exception if something failed (which allows us to monitor failures easily)
   }
 
 }

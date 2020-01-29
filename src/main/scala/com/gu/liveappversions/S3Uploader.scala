@@ -3,7 +3,7 @@ package com.gu.liveappversions
 import java.io.ByteArrayInputStream
 
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest }
+import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult }
 import com.gu.liveappversions.Config.Env
 import com.gu.liveappversions.Lambda.logger
 import io.circe.syntax._
@@ -17,7 +17,7 @@ object S3Uploader {
     .withRegion(Aws.euWest1.getName)
     .build()
 
-  def attemptUpload(buildOutput: BuildOutput, env: Env, bucketName: String): Unit = {
+  def attemptUpload(buildOutput: BuildOutput, env: Env, bucketName: String): Try[PutObjectResult] = {
 
     val stagePrefix = if (env.stage == "PROD") { "/" } else { s"/${env.stage}/" }
     val fileObjectKeyName = s"reserved-paths${stagePrefix}ios-live-app/recent-beta-releases.json"
@@ -37,11 +37,12 @@ object S3Uploader {
       .withCannedAcl(accessControl)
 
     Try(s3Client.putObject(putObjectRequest)) match {
-      case Success(_) =>
+      case Success(result) =>
         logger.info(s"Successfully uploaded new build info to S3 (bucket: $bucketName | keyName: $fileObjectKeyName)")
+        Success(result)
       case Failure(exception) =>
         logger.error(s"Failed to uploaded build to S3 (bucket: $bucketName | keyName: $fileObjectKeyName) due to: $exception")
-        throw exception
+        Failure(exception)
     }
 
   }

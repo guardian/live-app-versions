@@ -1,6 +1,7 @@
 package com.gu.liveappversions
 
 import com.gu.liveappversions.AppStoreConnectApi.{ BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse }
+import com.gu.liveappversions.Lambda.logger
 import io.circe.Encoder
 import io.circe.generic.auto._
 import io.circe.generic.semiauto._
@@ -33,7 +34,10 @@ object BuildOutput {
     for {
       latestBetaWithExternalTesters <- Try { buildAttributesForBuildDetails(betasWithExternalTesters.head.id, buildsResponse.data).get }
       previousBetasWithExternalTesters <- findPreviousThreeBetaVersions(betasWithExternalTesters, buildsResponse.data)
-    } yield BuildOutput(latestBetaWithExternalTesters, previousBetasWithExternalTesters)
+    } yield {
+      logger.info(s"The latest iOS beta with external beta testers is: ${latestBetaWithExternalTesters}. Previous versions are: ${previousBetasWithExternalTesters}")
+      BuildOutput(latestBetaWithExternalTesters, previousBetasWithExternalTesters)
+    }
   }
 
   def fromAppStoreConnectResponse(buildsResponse: BuildsResponse): Try[BuildOutput] = {
