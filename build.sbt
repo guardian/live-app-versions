@@ -18,6 +18,8 @@ scalacOptions ++= Seq(
 val circeVersion = "0.12.3"
 
 libraryDependencies ++= Seq(
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.714",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.1", // Pin a more recent version to avoid Snyk vulnerabilities introduced by s3 sdk
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
@@ -28,7 +30,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "org.slf4j" % "slf4j-api" % "1.7.30"
+  "org.slf4j" % "slf4j-api" % "1.7.30",
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 )
 
 enablePlugins(RiffRaffArtifact)
@@ -36,6 +39,7 @@ enablePlugins(RiffRaffArtifact)
 assemblyJarName := s"${name.value}.jar"
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case "module-info.class" => MergeStrategy.discard //See: https://stackoverflow.com/a/55557287
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
