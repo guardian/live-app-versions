@@ -38,7 +38,7 @@ enablePlugins(RiffRaffArtifact)
 
 assemblyJarName := s"${name.value}.jar"
 assemblyMergeStrategy in assembly := {
-  case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.first
+  case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.last
   case "META-INF/io.netty.versions.properties" => MergeStrategy.discard
   case "module-info.class" => MergeStrategy.discard //See: https://stackoverflow.com/a/55557287
   case x =>
