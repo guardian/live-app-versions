@@ -1,9 +1,10 @@
 package com.gu.liveappversions
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.PutObjectResult
-import com.gu.liveappversions.Config.{ AppStoreConnectConfig, Env }
-import org.slf4j.{ Logger, LoggerFactory }
+import com.gu.liveappversions.Config.{AppStoreConnectConfig, Env}
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.util.{Failure, Success}
 
 object Lambda {
 
@@ -15,7 +16,7 @@ object Lambda {
     process(env, "static-content-dist")
   }
 
-  def process(env: Env, uploadBucketName: String): PutObjectResult = {
+  def process(env: Env, uploadBucketName: String): Unit = {
     val appStoreConnectConfig = AppStoreConnectConfig(env)
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
     val attempt = for {
@@ -23,7 +24,13 @@ object Lambda {
       buildOutput <- BuildOutput.fromAppStoreConnectResponse(appStoreConnectResponse)
       uploadAttempt <- S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
     } yield uploadAttempt
-    attempt.get // This will throw an exception if something failed (which allows us to monitor failures easily)
+    attempt match {
+      case Success(_) =>
+        logger.info("Successfully updated build information")
+      case Failure(exception) =>
+        logger.error(s"Failed to update build information due to $exception")
+        throw exception // This allows us to monitor failures easily (using standard AWS metrics)
+    }
   }
 
 }

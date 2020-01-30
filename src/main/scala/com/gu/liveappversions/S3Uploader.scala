@@ -19,7 +19,7 @@ object S3Uploader {
 
   def attemptUpload(buildOutput: BuildOutput, env: Env, bucketName: String): Try[PutObjectResult] = {
 
-    val stagePrefix = if (env.stage == "PROD") { "/" } else { s"/${env.stage}/" }
+    val stagePrefix = if (env.stage == "PROD") "/" else s"/${env.stage}/"
     val fileObjectKeyName = s"reserved-paths${stagePrefix}ios-live-app/recent-beta-releases.json"
     val buildAttributesStream: ByteArrayInputStream = new ByteArrayInputStream(buildOutput.asJson.toString().getBytes)
 
