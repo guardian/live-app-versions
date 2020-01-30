@@ -27,8 +27,10 @@ Mappings:
   StageVariables:
     CODE:
       UploadPath: reserved-paths/CODE/ios-live-app/
+      ScheduleStatus: DISABLED
     PROD:
      UploadPath: reserved-paths/ios-live-app/
+     ScheduleStatus: ENABLED
 Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -100,7 +102,7 @@ Resources:
   PollingEvent:
     Type: AWS::Events::Rule
     Properties:
-      State: DISABLED
+      State: !FindInMap [StageVariables, !Ref Stage, ScheduleStatus]
       Description: Triggers the lambda periodically, allowing us to check whether a new version has been released
       ScheduleExpression: rate(5 minutes)
       Targets:
