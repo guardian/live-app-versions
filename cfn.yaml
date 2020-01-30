@@ -114,3 +114,27 @@ Resources:
       FunctionName: !GetAtt Lambda.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
+
+  FailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when retrieving/storing latest iOS beta version in ${Stage}
+      AlarmDescription: |
+        Tips for debugging this alert:
+        * Check the logs at https://logs.gutools.co.uk/s/mobile/goto/0538f002572d0d01f37e4f0b9212dc3a
+        * Check App Store Connect API status at: https://developer.apple.com/system-status/
+        * View the source code at https://github.com/guardian/live-app-versions
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref Lambda
+      Period: 600
+      EvaluationPeriods: 6
+      DatapointsToAlarm: 6
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
