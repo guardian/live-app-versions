@@ -1,23 +1,27 @@
 package com.gu.liveappversions
 
+import java.time.ZonedDateTime
+
 import com.gu.liveappversions.AppStoreConnectApi.{BetaBuildAttributes, BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse}
 import org.scalatest.FunSuite
 
 class BuildOutputTest extends FunSuite {
 
+  val now = ZonedDateTime.now()
+
   val releasedToExternalBetaDetails = BetaBuildDetails("id123", BetaBuildAttributes("IN_BETA_TESTING"))
-  val releasedToExternalBuildDetails = BuildDetails("id123", BuildAttributes("8.16 (5)"))
+  val releasedToExternalBuildDetails = BuildDetails("id123", BuildAttributes("8.16 (5)", now))
 
   val unreleasedToExternalBetaDetails = BetaBuildDetails("id999", BetaBuildAttributes("IN_REVIEW"))
-  val unreleasedToExternalBuildDetails = BuildDetails("id999", BuildAttributes("8.16 (56)"))
+  val unreleasedToExternalBuildDetails = BuildDetails("id999", BuildAttributes("8.16 (56)", now))
 
   test("findLatestBuildsWithExternalTesters should correctly identify the 4 most recent beta versions from Apple's response") {
     val buildDetails = List(
       releasedToExternalBuildDetails,
-      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)")),
-      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)")),
-      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)")),
-      releasedToExternalBuildDetails.copy(id = "id127").copy(attributes = BuildAttributes("8.16 (1)"))
+      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)", now)),
+      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)", now)),
+      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)", now)),
+      releasedToExternalBuildDetails.copy(id = "id127").copy(attributes = BuildAttributes("8.16 (1)", now))
     )
     val betaDetails = List(
       releasedToExternalBetaDetails,
@@ -38,9 +42,9 @@ class BuildOutputTest extends FunSuite {
     val buildDetails = List(
       unreleasedToExternalBuildDetails,
       releasedToExternalBuildDetails,
-      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)")),
-      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)")),
-      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)")),
+      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)", now)),
+      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)", now)),
+      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)", now)),
     )
     val betaDetails = List(
       unreleasedToExternalBetaDetails,
@@ -68,9 +72,9 @@ class BuildOutputTest extends FunSuite {
   test("findLatestBuildsWithExternalTesters should fail if it cannot find the version name for the most recent beta") {
     val buildDetails = List(
       releasedToExternalBuildDetails.copy("fakeId"),
-      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)")),
-      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)")),
-      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)")),
+      releasedToExternalBuildDetails.copy(id = "id124").copy(attributes = BuildAttributes("8.16 (4)", now)),
+      releasedToExternalBuildDetails.copy(id = "id125").copy(attributes = BuildAttributes("8.16 (3)", now)),
+      releasedToExternalBuildDetails.copy(id = "id126").copy(attributes = BuildAttributes("8.16 (2)", now)),
     )
     val betaDetails = List(
       releasedToExternalBetaDetails,
