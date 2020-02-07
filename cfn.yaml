@@ -146,7 +146,7 @@ Resources:
                   Value: !Ref Lambda
             Period: 3600
             Stat: Sum
-            ReturnData: false
+          ReturnData: false
         - Id: m2
           Label: Number of invocations for lambda
           MetricStat:
@@ -158,7 +158,7 @@ Resources:
                   Value: !Ref Lambda
             Period: 3600
             Stat: Sum
-            ReturnData: false
+          ReturnData: false
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Threshold: 100
