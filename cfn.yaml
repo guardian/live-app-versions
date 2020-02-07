@@ -28,9 +28,11 @@ Mappings:
     CODE:
       UploadPath: reserved-paths/CODE/ios-live-app/
       ScheduleStatus: DISABLED
+      AlarmActionsEnabled: FALSE
     PROD:
      UploadPath: reserved-paths/ios-live-app/
      ScheduleStatus: ENABLED
+     AlarmActionsEnabled: TRUE
 Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -120,6 +122,7 @@ Resources:
   FailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
+      ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
       AlarmName: !Sub Failures when retrieving/storing latest iOS beta version in ${Stage}
@@ -128,15 +131,34 @@ Resources:
         * Check the logs at https://logs.gutools.co.uk/s/mobile/goto/0538f002572d0d01f37e4f0b9212dc3a
         * Check App Store Connect API status at: https://developer.apple.com/system-status/
         * View the source code at https://github.com/guardian/live-app-versions
+      Metrics:
+        - Id: e1
+          Label: Error percentage of lambda
+          Expression: "100*(m1/m2)"
+        - Id: m1
+          Label: Number of errors for lambda
+          MetricStat:
+            Metric:
+              MetricName: Errors
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref Lambda
+            Period: 3600
+            Stat: Sum
+            ReturnData: false
+        - Id: m2
+          Label: Number of invocations for lambda
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref Lambda
+            Period: 3600
+            Stat: Sum
+            ReturnData: false
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: FunctionName
-          Value: !Ref Lambda
-      Period: 600
-      EvaluationPeriods: 6
-      DatapointsToAlarm: 6
-      MetricName: Errors
-      Namespace: AWS/Lambda
-      Statistic: Sum
-      Threshold: 1
-      TreatMissingData: notBreaching
+      EvaluationPeriods: 1
+      Threshold: 100
