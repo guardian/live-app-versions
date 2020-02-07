@@ -30,9 +30,9 @@ Mappings:
       ScheduleStatus: DISABLED
       AlarmActionsEnabled: FALSE
     PROD:
-     UploadPath: reserved-paths/ios-live-app/
-     ScheduleStatus: ENABLED
-     AlarmActionsEnabled: TRUE
+      UploadPath: reserved-paths/ios-live-app/
+      ScheduleStatus: ENABLED
+      AlarmActionsEnabled: TRUE
 Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
