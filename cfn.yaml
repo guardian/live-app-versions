@@ -101,7 +101,7 @@ Resources:
       Runtime: java8
       Timeout: 60
 
-  LiveAppVersionsLambda:
+  Lambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub live-app-versions-${Stage}
@@ -129,14 +129,14 @@ Resources:
       Description: Triggers the lambda periodically, allowing us to check whether a new version has been released
       ScheduleExpression: rate(5 minutes)
       Targets:
-        - Id: LiveAppVersionsLambda
-          Arn: !GetAtt LiveAppVersionsLambda.Arn
+        - Id: Lambda
+          Arn: !GetAtt Lambda.Arn
 
   PollingEventLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt LiveAppVersionsLambda.Arn
+      FunctionName: !GetAtt Lambda.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
@@ -164,7 +164,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref LiveAppVersionsLambda
+                  Value: !Ref Lambda
             Period: 3600
             Stat: Sum
           ReturnData: false
@@ -176,7 +176,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref LiveAppVersionsLambda
+                  Value: !Ref Lambda
             Period: 3600
             Stat: Sum
           ReturnData: false
