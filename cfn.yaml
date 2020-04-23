@@ -83,7 +83,7 @@ Resources:
   IosDeploymentsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub ${App}-${Stage}
+      FunctionName: !Sub ios-deployments-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
@@ -104,7 +104,7 @@ Resources:
   LiveAppVersionsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub ${App}-${Stage}
+      FunctionName: !Sub live-app-versions-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
