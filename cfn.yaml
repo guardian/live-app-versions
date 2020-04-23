@@ -80,7 +80,7 @@ Resources:
                 - arn:aws:s3:::static-content-dist/${Path}*
                 - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
 
-  Lambda:
+  LiveAppVersionsLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub ${App}-${Stage}
@@ -108,14 +108,14 @@ Resources:
       Description: Triggers the lambda periodically, allowing us to check whether a new version has been released
       ScheduleExpression: rate(5 minutes)
       Targets:
-        - Id: Lambda
-          Arn: !GetAtt Lambda.Arn
+        - Id: LiveAppVersionsLambda
+          Arn: !GetAtt LiveAppVersionsLambda.Arn
 
   PollingEventLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt Lambda.Arn
+      FunctionName: !GetAtt LiveAppVersionsLambda.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
@@ -143,7 +143,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref Lambda
+                  Value: !Ref LiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
@@ -155,7 +155,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref Lambda
+                  Value: !Ref LiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
