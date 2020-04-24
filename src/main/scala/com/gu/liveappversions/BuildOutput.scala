@@ -1,6 +1,6 @@
 package com.gu.liveappversions
 
-import com.gu.liveappversions.AppStoreConnectApi.{ BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse }
+import com.gu.appstoreconnectapi.AppStoreConnectApi.{ BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse }
 import com.gu.liveappversions.Lambda.logger
 import io.circe.Encoder
 import io.circe.generic.auto._

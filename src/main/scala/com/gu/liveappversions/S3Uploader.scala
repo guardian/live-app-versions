@@ -4,7 +4,8 @@ import java.io.ByteArrayInputStream
 
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult }
-import com.gu.liveappversions.Config.Env
+import com.gu.config.Aws
+import com.gu.config.Config.Env
 import com.gu.liveappversions.Lambda.logger
 import io.circe.syntax._
 

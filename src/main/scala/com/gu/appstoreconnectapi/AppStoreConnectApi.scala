@@ -1,9 +1,10 @@
-package com.gu.liveappversions
+package com.gu.appstoreconnectapi
 
 import java.time.{ ZoneOffset, ZonedDateTime }
 
-import com.gu.liveappversions.Config.AppStoreConnectConfig
+import com.gu.config.Config.AppStoreConnectConfig
 import io.circe.Decoder.Result
+import io.circe.parser.decode
 import io.circe.{ Decoder, HCursor }
 import okhttp3.{ OkHttpClient, Request }
 import io.circe.parser._

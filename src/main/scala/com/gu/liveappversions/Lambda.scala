@@ -1,10 +1,11 @@
 package com.gu.liveappversions
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.liveappversions.Config.{AppStoreConnectConfig, Env}
-import org.slf4j.{Logger, LoggerFactory}
+import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
+import com.gu.config.Config.{ AppStoreConnectConfig, Env }
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object Lambda {
 

@@ -1,10 +1,11 @@
-package com.gu.liveappversions
+package com.gu.config
 
-import com.turo.pushy.apns.auth.ApnsSigningKey
-import com.gu.AwsIdentity
-import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
+
+import com.gu.AwsIdentity
+import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
+import com.turo.pushy.apns.auth.ApnsSigningKey
 
 object Config {
 

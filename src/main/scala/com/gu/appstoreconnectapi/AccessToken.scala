@@ -1,8 +1,8 @@
-package com.gu.liveappversions
+package com.gu.appstoreconnectapi
 
 import java.time.ZonedDateTime
 
-import com.gu.liveappversions.Config.AppStoreConnectConfig
+import com.gu.config.Config.AppStoreConnectConfig
 import pdi.jwt.{ Jwt, JwtAlgorithm, JwtClaim, JwtHeader }
 
 object JwtTokenBuilder {

@@ -1,7 +1,7 @@
-package com.gu.liveappversions
+package com.gu.config
 
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider }
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider }
 import com.amazonaws.regions.Regions
 
 object Aws {

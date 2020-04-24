@@ -80,10 +80,31 @@ Resources:
                 - arn:aws:s3:::static-content-dist/${Path}*
                 - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
 
+  IosDeploymentsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ios-deployments-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+          APPLE_APP_ID: !Ref AppleAppId
+      Description: Lambda function which distributes uploaded iOS builds to beta testers.
+      Handler: com.gu.iosdeployments.Lambda::handler
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
   Lambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub ${App}-${Stage}
+      FunctionName: !Sub live-app-versions-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket

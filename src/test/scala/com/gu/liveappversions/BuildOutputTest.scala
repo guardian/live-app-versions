@@ -2,7 +2,7 @@ package com.gu.liveappversions
 
 import java.time.ZonedDateTime
 
-import com.gu.liveappversions.AppStoreConnectApi.{BetaBuildAttributes, BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse}
+import com.gu.appstoreconnectapi.AppStoreConnectApi.{BetaBuildAttributes, BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse}
 import org.scalatest.FunSuite
 
 class BuildOutputTest extends FunSuite {
