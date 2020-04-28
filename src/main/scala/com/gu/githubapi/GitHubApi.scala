@@ -56,21 +56,4 @@ object GitHubApi {
     }
   }
 
-  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deploymentId: String): Try[Response] = {
-    val statusUpdate =
-      """
-        |{
-        |	"state": "success",
-        |	"description": "123"
-        |}
-        |""".stripMargin
-    val path = s"/guardian/ios-live/deployments/$deploymentId/statuses"
-    val attempt = Try(SharedClient.client.newCall(gitHubPostRequest(s"$restApiUrl/$path", statusUpdate, gitHubConfig)).execute)
-    attempt match {
-      case Success(response) if !response.isSuccessful => Failure(
-        GitHubApiException(s"Response code: ${response.code()} | response body: ${response.body().string()}"))
-      case _ => attempt
-    }
-  }
-
 }
