@@ -6,9 +6,9 @@ import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
 import io.circe.generic.auto._
-import okhttp3.{ MediaType, Request, RequestBody, Response, ResponseBody }
+import okhttp3.{ MediaType, Request, RequestBody }
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 object GitHubApi {
 
