@@ -1,27 +1,26 @@
 package com.gu.liveappversions
 
-import com.gu.appstoreconnectapi.AppStoreConnectApi.{ BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse }
+import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
 import com.gu.liveappversions.Lambda.logger
-import io.circe.Encoder
-import io.circe.generic.auto._
-import io.circe.generic.semiauto._
+import io.circe.generic.semiauto.deriveEncoder
+import io.circe.{ Encoder, HCursor, Json }
 
 import scala.util.{ Failure, Success, Try }
 
-case class BuildOutput(latestReleasedBuild: BuildAttributes, previouslyReleasedBuilds: List[BuildAttributes])
+case class BuildOutput(latestReleasedBuild: LiveAppBeta, previouslyReleasedBuilds: List[LiveAppBeta])
 
 object BuildOutput {
 
   implicit val buildOutputEncoder: Encoder[BuildOutput] = deriveEncoder[BuildOutput]
 
-  def buildAttributesForBuildDetails(buildId: String, buildsDetails: List[BuildDetails]): Option[BuildAttributes] = {
-    buildsDetails.find(_.id == buildId).map(_.attributes)
+  implicit val liveAppBetaEncoder: Encoder[LiveAppBeta] = new Encoder[LiveAppBeta] {
+    final def apply(beta: LiveAppBeta): Json = Json.obj(
+      ("version", Json.fromString(beta.version)),
+      ("uploadedDate", Json.fromString(beta.uploadedDate.toString)))
   }
 
-  def findPreviousThreeBetaVersions(allBetas: List[BetaBuildDetails], buildsDetails: List[BuildDetails]): Try[List[BuildAttributes]] = {
-    val attemptToFindPreviousThreeBetas = allBetas.slice(1, 4).flatMap { beta =>
-      buildAttributesForBuildDetails(beta.id, buildsDetails)
-    }
+  def findPreviousThreeBetaVersions(betas: List[LiveAppBeta]): Try[List[LiveAppBeta]] = {
+    val attemptToFindPreviousThreeBetas = betas.slice(1, 4)
     if (attemptToFindPreviousThreeBetas.size != 3) {
       Failure(new RuntimeException(s"Expected to find at least three previous betas but found ${attemptToFindPreviousThreeBetas.size}"))
     } else {
@@ -29,19 +28,15 @@ object BuildOutput {
     }
   }
 
-  def findLatestBuildsWithExternalTesters(buildsResponse: BuildsResponse): Try[BuildOutput] = {
-    val betasWithExternalTesters = buildsResponse.included.filter(_.attributes.externalBuildState == "IN_BETA_TESTING")
+  def findLatestBuildsWithExternalTesters(betas: List[LiveAppBeta]): Try[BuildOutput] = {
+    val betasWithExternalTesters = betas.filter(_.externalBuildState == "IN_BETA_TESTING")
     for {
-      latestBetaWithExternalTesters <- Try { buildAttributesForBuildDetails(betasWithExternalTesters.head.id, buildsResponse.data).get }
-      previousBetasWithExternalTesters <- findPreviousThreeBetaVersions(betasWithExternalTesters, buildsResponse.data)
+      latestBetaWithExternalTesters <- Try { betasWithExternalTesters.head }
+      previousBetasWithExternalTesters <- findPreviousThreeBetaVersions(betasWithExternalTesters)
     } yield {
       logger.info(s"The latest iOS beta with external beta testers is: ${latestBetaWithExternalTesters}. Previous versions are: ${previousBetasWithExternalTesters}")
       BuildOutput(latestBetaWithExternalTesters, previousBetasWithExternalTesters)
     }
-  }
-
-  def fromAppStoreConnectResponse(buildsResponse: BuildsResponse): Try[BuildOutput] = {
-    findLatestBuildsWithExternalTesters(buildsResponse)
   }
 
 }
