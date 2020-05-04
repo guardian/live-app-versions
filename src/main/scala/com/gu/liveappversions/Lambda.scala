@@ -21,8 +21,8 @@ object Lambda {
     val appStoreConnectConfig = AppStoreConnectConfig(env)
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
     val attempt = for {
-      appStoreConnectResponse <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
-      buildOutput <- BuildOutput.fromAppStoreConnectResponse(appStoreConnectResponse)
+      latestBetas <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
+      buildOutput <- BuildOutput.findLatestBuildsWithExternalTesters(latestBetas)
       uploadAttempt <- S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
     } yield uploadAttempt
     attempt match {

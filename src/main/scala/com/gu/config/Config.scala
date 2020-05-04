@@ -9,6 +9,12 @@ import com.turo.pushy.apns.auth.ApnsSigningKey
 
 object Config {
 
+  def setupAppIdentity(env: Env) = AwsIdentity(
+    app = env.app,
+    stack = env.stack,
+    stage = env.stage,
+    region = Aws.euWest1.getName)
+
   case class Env(app: String, stack: String, stage: String) {
     override def toString: String = s"App: $app, Stack: $stack, Stage: $stage\n"
   }
@@ -26,12 +32,6 @@ object Config {
 
     def apply(env: Env): AppStoreConnectConfig = {
 
-      def setupAppIdentity(env: Env) = AwsIdentity(
-        app = env.app,
-        stack = env.stack,
-        stage = env.stage,
-        region = Aws.euWest1.getName)
-
       val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
@@ -48,6 +48,18 @@ object Config {
           teamId,
           keyId),
         appleAppId = System.getenv("APPLE_APP_ID"))
+    }
+  }
+
+  case class GitHubConfig(token: String)
+
+  object GitHubConfig {
+    def apply(env: Env): GitHubConfig = {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
+        case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
+      }
+      val token = ssmPrivateConfig.getString("github.token")
+      GitHubConfig(token)
     }
   }
 
