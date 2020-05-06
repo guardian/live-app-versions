@@ -37,10 +37,10 @@ object Lambda {
           (runningDeployment.environment, attemptToFindBeta) match {
             case ("internal-beta", Some(LiveAppBeta(_, _, "IN_BETA_TESTING", _))) =>
               logger.info(s"Internal beta deployment for ${runningDeployment.version} is complete...")
-            // GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment.databaseId)
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
             case ("external-beta", Some(LiveAppBeta(_, _, _, "IN_BETA_TESTING"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} is complete...")
-            // GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment.databaseId)
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
             case ("external-beta", Some(LiveAppBeta(_, _, _, "READY_FOR_TESTING"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             // Distribute to external testers here
@@ -54,8 +54,8 @@ object Lambda {
     }
 
     result match {
-      case Success(_) => logger.info("Successfully checked deployment status")
-      case Failure(exception) => logger.error(s"Failed to check deployment status due to: ${exception}", exception)
+      case Success(_) => logger.info("Successfully checked/updated deployment status")
+      case Failure(exception) => logger.error(s"Failed to check or update deployment status due to: ${exception}", exception)
     }
 
   }

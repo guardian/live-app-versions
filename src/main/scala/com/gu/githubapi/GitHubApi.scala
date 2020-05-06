@@ -56,4 +56,21 @@ object GitHubApi {
     }
   }
 
+  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+    val url = s"$restApiUrl/repos/guardian/ios-live/deployments/${deployment.gitHubDatabaseId.toString}/statuses"
+    val body =
+      s"""
+        |{
+        |  "state": "success",
+        |  "description": "${deployment.version}"
+        |}
+        |""".stripMargin
+    for {
+      httpResponse <- Try(SharedClient.client.newCall(gitHubPostRequest(url, body, gitHubConfig)).execute)
+      _ <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
+    } yield {
+      ()
+    }
+  }
+
 }
