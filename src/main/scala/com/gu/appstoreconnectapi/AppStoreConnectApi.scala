@@ -50,16 +50,22 @@ object AppStoreConnectApi {
     } yield liveAppBetas
   }
 
-  def distributeToExternalTesterGroup(token: String, buildId: String, externalTesterGroup: ExternalTesterGroup): Try[Unit] = {
+  def distributeToExternalTesters(token: String, buildId: String, externalTesterConfig: ExternalTesterConfig): Try[Unit] = {
 
     val url = s"$appStoreConnectBaseUrl/builds/$buildId/relationships/betaGroups"
 
     val body = s"""
                   |{
-                  |  "data": {
-                  |    "id": "${externalTesterGroup.id}",
-                  |    "type": "betaGroups"
-                  |  }
+                  |  "data": [
+                  |     {
+                  |       "id": "${externalTesterConfig.group1.id}",
+                  |         "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group2.id}",
+                  |         "type": "betaGroups"
+                  |     }
+                  |  ]
                   |}
                   |""".stripMargin
     val request = new Request.Builder()
@@ -71,15 +77,8 @@ object AppStoreConnectApi {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
     } yield {
-      logger.info(s"Successfully distributed build to $externalTesterGroup")
+      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1} and ${externalTesterConfig.group2}")
     }
-  }
-
-  def distributeToExternalTesters(token: String, buildId: String, externalTesterConfig: ExternalTesterConfig): Try[Unit] = {
-    for {
-      group1 <- distributeToExternalTesterGroup(token, buildId, externalTesterConfig.group1)
-      group2 <- distributeToExternalTesterGroup(token, buildId, externalTesterConfig.group2)
-    } yield ()
   }
 
 }
