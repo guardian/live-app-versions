@@ -8,7 +8,7 @@ import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
 import com.gu.githubapi.GitHubApi
 import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 object Lambda {
 
@@ -55,7 +55,7 @@ object Lambda {
       }
     }
 
-    result match {
+    result.flatten match {
       case Success(_) => logger.info("Successfully checked/updated deployment status")
       case Failure(exception) => logger.error(s"Failed to check or update deployment status due to: ${exception}", exception)
     }

@@ -1,9 +1,9 @@
 package com.gu.okhttp
 
-import okhttp3.{OkHttpClient, Response}
-import org.slf4j.{Logger, LoggerFactory}
+import okhttp3.{ OkHttpClient, Response }
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 case class ApiException(message: String) extends Throwable(message: String)
 
@@ -21,7 +21,7 @@ object SharedClient {
       logger.warn(message)
       Failure(ApiException(message))
     } else {
-      logger.info(s"Received successful response from $apiName. Response code: ${response.code()} | response body: ${responseBody}")
+      logger.info(s"Received successful response from $apiName. Response code: ${response.code()}")
       Success(responseBody)
     }
   }
