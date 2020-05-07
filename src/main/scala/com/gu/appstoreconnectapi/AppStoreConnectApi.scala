@@ -57,7 +57,7 @@ object AppStoreConnectApi {
     val body = s"""
                   |{
                   |  "data": {
-                  |    "id": "${externalTesterGroup.id}"
+                  |    "id": "${externalTesterGroup.id}",
                   |    "type": "betaGroups"
                   |  }
                   |}
