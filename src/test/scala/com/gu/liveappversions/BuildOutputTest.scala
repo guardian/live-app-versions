@@ -9,8 +9,8 @@ class BuildOutputTest extends FunSuite {
 
   val now = ZonedDateTime.now()
 
-  val releasedToExternalBeta = LiveAppBeta("12349", now, "IN_BETA_TESTING", "IN_BETA_TESTING")
-  val unreleasedToExternalBeta = LiveAppBeta("22349", now, "IN_BETA_TESTING", "IN_REVIEW")
+  val releasedToExternalBeta = LiveAppBeta("12349", "id123", now, "IN_BETA_TESTING", "IN_BETA_TESTING")
+  val unreleasedToExternalBeta = LiveAppBeta("22349", "id223", now, "IN_BETA_TESTING", "IN_REVIEW")
 
   test("findLatestBuildsWithExternalTesters should correctly identify the 4 most recent beta versions from Apple's response") {
 

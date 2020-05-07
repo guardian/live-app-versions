@@ -30,11 +30,11 @@ class ConversionTest extends FunSuite {
     val buildsResponse = BuildsResponse(allBuildDetails, allBetaBuildDetails)
     val result = Conversion.combineModels(buildsResponse)
     val expectedResults = List(
-      LiveAppBeta("12345", now, "INTERNAL", "EXTERNAL"),
-      LiveAppBeta("12344", now, "INTERNAL", "EXTERNAL"),
-      LiveAppBeta("12343", now, "INTERNAL", "EXTERNAL"),
-      LiveAppBeta("12342", now, "INTERNAL", "EXTERNAL"),
-      LiveAppBeta("12341", now, "INTERNAL", "EXTERNAL"))
+      LiveAppBeta("12345", "id123", now, "INTERNAL", "EXTERNAL"),
+      LiveAppBeta("12344", "id124", now, "INTERNAL", "EXTERNAL"),
+      LiveAppBeta("12343", "id125", now, "INTERNAL", "EXTERNAL"),
+      LiveAppBeta("12342", "id126", now, "INTERNAL", "EXTERNAL"),
+      LiveAppBeta("12341", "id127", now, "INTERNAL", "EXTERNAL"))
     assert(result == Success(expectedResults))
   }
 
