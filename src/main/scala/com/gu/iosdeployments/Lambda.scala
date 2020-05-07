@@ -39,13 +39,13 @@ object Lambda {
           (runningDeployment.environment, attemptToFindBeta) match {
             case ("internal-beta", Some(LiveAppBeta(_, _, _, "IN_BETA_TESTING", _))) =>
               logger.info(s"Internal beta deployment for ${runningDeployment.version} is complete...")
-              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment).get
             case ("external-beta", Some(LiveAppBeta(_, _, _, _, "IN_BETA_TESTING"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} is complete...")
-              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment).get
             case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "READY_FOR_BETA_SUBMISSION"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
-              AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
+              AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig).get
             case (_, None) =>
               logger.info(s"Found running deployment ${runningDeployment.version}, but build was not present in App Store Connect response")
             case _ =>
@@ -55,7 +55,7 @@ object Lambda {
       }
     }
 
-    result.flatten match {
+    result match {
       case Success(_) => logger.info("Successfully checked/updated deployment status")
       case Failure(exception) => logger.error(s"Failed to check or update deployment status due to: ${exception}", exception)
     }
