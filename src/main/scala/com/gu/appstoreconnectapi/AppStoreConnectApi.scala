@@ -11,10 +11,13 @@ import io.circe.{ Decoder, HCursor }
 import okhttp3.{ MediaType, Request, RequestBody, Response }
 import io.circe.parser._
 import io.circe.generic.auto._
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.Try
 
 object AppStoreConnectApi {
+
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val decodeBuildAttributes: Decoder[BuildAttributes] = new Decoder[BuildAttributes] {
     override def apply(c: HCursor): Result[BuildAttributes] = for {
@@ -47,34 +50,36 @@ object AppStoreConnectApi {
     } yield liveAppBetas
   }
 
-  def distributeToExternalTesters(token: String, buildId: String, externalTesterConfig: ExternalTesterConfig): Try[Unit] = {
+  def distributeToExternalTesterGroup(token: String, buildId: String, externalTesterGroup: ExternalTesterGroup): Try[Unit] = {
 
     val url = s"$appStoreConnectBaseUrl/builds/$buildId/relationships/betaGroups"
 
-    def executeRequestForGroup(externalTesterGroup: ExternalTesterGroup): Try[Response] = {
-      val body = s"""
-         |{
-         |  "data": {
-         |    "id": "${externalTesterGroup.id}"
-         |    "type": "betaGroups"
-         |  }
-         |}
-         |""".stripMargin
-      val request = new Request.Builder()
-        .url(url)
-        .addHeader("Authorization", s"Bearer $token")
-        .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
-        .build
-      Try(SharedClient.client.newCall(request).execute)
-    }
-
+    val body = s"""
+                  |{
+                  |  "data": {
+                  |    "id": "${externalTesterGroup.id}"
+                  |    "type": "betaGroups"
+                  |  }
+                  |}
+                  |""".stripMargin
+    val request = new Request.Builder()
+      .url(url)
+      .addHeader("Authorization", s"Bearer $token")
+      .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
+      .build
     for {
-      httpResponse <- executeRequestForGroup(externalTesterConfig.group1)
+      httpResponse <- Try(SharedClient.client.newCall(request).execute)
       _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
-      httpResponse <- executeRequestForGroup(externalTesterConfig.group2)
-      _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
-    } yield ()
+    } yield {
+      logger.info(s"Successfully distributed build to $externalTesterGroup")
+    }
+  }
 
+  def distributeToExternalTesters(token: String, buildId: String, externalTesterConfig: ExternalTesterConfig): Try[Unit] = {
+    for {
+      group1 <- distributeToExternalTesterGroup(token, buildId, externalTesterConfig.group1)
+      group2 <- distributeToExternalTesterGroup(token, buildId, externalTesterConfig.group2)
+    } yield ()
   }
 
 }
