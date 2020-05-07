@@ -49,7 +49,7 @@ object Lambda {
             case (_, None) =>
               logger.info(s"Found running deployment ${runningDeployment.version}, but build was not present in App Store Connect response")
             case _ =>
-              logger.info(s"No action was required for ${runningDeployment.version}")
+              logger.info(s"No action was required for ${runningDeployment.version}. Full details are: $runningDeployment")
           }
         case None => logger.info("No running deployments found.")
       }
