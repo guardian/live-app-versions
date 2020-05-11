@@ -8,7 +8,7 @@ import scala.util.{Failure, Success, Try}
 
 object Conversion {
 
-  case class LiveAppBeta(version: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
+  case class LiveAppBeta(version: String, buildId: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
 
   case object CombinedResponseException extends Throwable
 
@@ -26,6 +26,7 @@ object Conversion {
           val betaBuildDetails = buildsResponse.included.find(_.id == buildDetails.id).get
           LiveAppBeta(
             version = buildDetails.attributes.version,
+            buildId = buildDetails.id,
             uploadedDate = buildDetails.attributes.uploadedDate,
             internalBuildState = betaBuildDetails.attributes.internalBuildState,
             externalBuildState = betaBuildDetails.attributes.externalBuildState,

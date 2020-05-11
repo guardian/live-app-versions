@@ -3,18 +3,21 @@ package com.gu.appstoreconnectapi
 import java.time.{ ZoneOffset, ZonedDateTime }
 
 import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, combineModels }
-import com.gu.config.Config.AppStoreConnectConfig
+import com.gu.config.Config.{ AppStoreConnectConfig, ExternalTesterConfig, ExternalTesterGroup }
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder.Result
 import io.circe.parser.decode
 import io.circe.{ Decoder, HCursor }
-import okhttp3.Request
+import okhttp3.{ MediaType, Request, RequestBody, Response }
 import io.circe.parser._
 import io.circe.generic.auto._
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.Try
 
 object AppStoreConnectApi {
+
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val decodeBuildAttributes: Decoder[BuildAttributes] = new Decoder[BuildAttributes] {
     override def apply(c: HCursor): Result[BuildAttributes] = for {
@@ -45,6 +48,65 @@ object AppStoreConnectApi {
       buildsResponse <- decode[BuildsResponse](bodyAsString).toTry
       liveAppBetas <- combineModels(buildsResponse)
     } yield liveAppBetas
+  }
+
+  def submitForBetaTesting(token: String, buildId: String): Try[Unit] = {
+    val url = s"$appStoreConnectBaseUrl/betaAppReviewSubmissions"
+    val body = s"""
+                  |{
+                  |  "data": {
+                  |    "relationships": {
+                  |      "build": {
+                  |        "data": {
+                  |          "id": "$buildId",
+                  |          "type": "builds"
+                  |        }
+                  |      }
+                  |    },
+                  |    "type": "betaAppReviewSubmissions"
+                  |  }
+                  |}
+                  |""".stripMargin
+    val request = new Request.Builder()
+      .url(url)
+      .addHeader("Authorization", s"Bearer $token")
+      .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
+      .build
+    for {
+      httpResponse <- Try(SharedClient.client.newCall(request).execute)
+      _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
+    } yield {
+      logger.info(s"Successfully submitted build for beta review")
+    }
+  }
+
+  def distributeToExternalTesters(token: String, buildId: String, externalTesterConfig: ExternalTesterConfig): Try[Unit] = {
+    val url = s"$appStoreConnectBaseUrl/builds/$buildId/relationships/betaGroups"
+    val body = s"""
+                  |{
+                  |  "data": [
+                  |     {
+                  |       "id": "${externalTesterConfig.group1.id}",
+                  |         "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group2.id}",
+                  |         "type": "betaGroups"
+                  |     }
+                  |  ]
+                  |}
+                  |""".stripMargin
+    val request = new Request.Builder()
+      .url(url)
+      .addHeader("Authorization", s"Bearer $token")
+      .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
+      .build
+    for {
+      httpResponse <- Try(SharedClient.client.newCall(request).execute)
+      _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
+    } yield {
+      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1} and ${externalTesterConfig.group2}")
+    }
   }
 
 }

@@ -3,11 +3,12 @@ package com.gu.iosdeployments
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
 import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
+import com.gu.config.Config
 import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
 import com.gu.githubapi.GitHubApi
 import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 object Lambda {
 
@@ -24,6 +25,7 @@ object Lambda {
     val appStoreConnectConfig = AppStoreConnectConfig(env)
     val appStoreConnectToken = JwtTokenBuilder.buildToken(appStoreConnectConfig)
     val gitHubConfig = GitHubConfig(env)
+    val externalTesterConfig = if (env.stage == "PROD") { Config.externalTesterConfigForProd } else { Config.externalTesterConfigForTesting }
     logger.info("Successfully loaded configuration...")
     val result = for {
       runningDeployments <- GitHubApi.getRunningDeployments(gitHubConfig)
@@ -35,19 +37,22 @@ object Lambda {
         case Some(runningDeployment) =>
           val attemptToFindBeta = appStoreConnectBetaBuilds.find(_.version == runningDeployment.version)
           (runningDeployment.environment, attemptToFindBeta) match {
-            case ("internal-beta", Some(LiveAppBeta(_, _, "IN_BETA_TESTING", _))) =>
+            case ("internal-beta", Some(LiveAppBeta(_, _, _, "IN_BETA_TESTING", _))) =>
               logger.info(s"Internal beta deployment for ${runningDeployment.version} is complete...")
-              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
-            case ("external-beta", Some(LiveAppBeta(_, _, _, "IN_BETA_TESTING"))) =>
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment).get
+            case ("external-beta", Some(LiveAppBeta(_, _, _, _, "IN_BETA_TESTING"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} is complete...")
-              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
-            case ("external-beta", Some(LiveAppBeta(_, _, _, "READY_FOR_TESTING"))) =>
+              GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment).get
+            case ("external-beta", Some(build @ LiveAppBeta(_, _, _, "IN_BETA_TESTING", "READY_FOR_BETA_SUBMISSION"))) =>
+              logger.info(s"External beta deployment for ${runningDeployment.version} can now be submitted for review...")
+              AppStoreConnectApi.submitForBetaTesting(appStoreConnectToken, build.buildId).get
+            case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
               logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
-            // Distribute to external testers here
+              AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig).get
             case (_, None) =>
               logger.info(s"Found running deployment ${runningDeployment.version}, but build was not present in App Store Connect response")
             case _ =>
-              logger.info(s"No action was required for ${runningDeployment.version}")
+              logger.info(s"No action was required for ${runningDeployment.version}. Full details are: $attemptToFindBeta")
           }
         case None => logger.info("No running deployments found.")
       }
