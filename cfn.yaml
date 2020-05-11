@@ -104,7 +104,7 @@ Resources:
   LiveAppVersionsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub live-app-versions-v2-${Stage}
+      FunctionName: !Sub live-app-versions-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
