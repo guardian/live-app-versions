@@ -150,7 +150,7 @@ Resources:
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
-  FailureAlarm:
+  LiveAppVersionsFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
@@ -158,12 +158,9 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
       OKActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
-      AlarmName: !Sub Failures when retrieving/storing latest iOS beta version in ${Stage}
+      AlarmName: !Sub Failures when retrieving or storing the latest iOS beta version in ${Stage}
       AlarmDescription: |
-        Tips for debugging this alert:
-        * Check the logs at https://logs.gutools.co.uk/s/mobile/goto/0538f002572d0d01f37e4f0b9212dc3a
-        * Check App Store Connect API status at: https://developer.apple.com/system-status/
-        * View the source code at https://github.com/guardian/live-app-versions
+        See Runbook: https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.f2qd026kxlds
       Metrics:
         - Id: e1
           Label: Error percentage of lambda
@@ -195,3 +192,47 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Threshold: 100
+
+  IosDeploymentsFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      OKActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when checking or updating iOS beta deployments in ${Stage}
+      AlarmDescription: |
+        See Runbook: https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.fxgskya8ndu0
+      Metrics:
+        - Id: e1
+          Label: Error percentage of lambda
+          Expression: "100*(m1/m2)"
+        - Id: m1
+          Label: Number of errors for lambda
+          MetricStat:
+            Metric:
+              MetricName: Errors
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref IosDeploymentsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+        - Id: m2
+          Label: Number of invocations for lambda
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref IosDeploymentsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Threshold: 100
+
