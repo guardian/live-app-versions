@@ -188,7 +188,7 @@ Resources:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
       OKActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
-      AlarmName: !Sub Failures when retrieving or storing the latest iOS beta version in ${Stage}
+      AlarmName: !Sub Failures when retrieving or storing the latest iOS versions in ${Stage}
       AlarmDescription: |
         <<<Runbook|https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.f2qd026kxlds>>>
       Metrics:
