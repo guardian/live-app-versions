@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.1", // Pin a more recent version to avoid Snyk vulnerabilities introduced by s3 sdk
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
+  "com.google.auth" % "google-auth-library-oauth2-http" % "0.20.0",
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.8.2",
   "com.pauldijou" %% "jwt-core" % "4.2.0",
