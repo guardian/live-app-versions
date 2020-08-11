@@ -1,7 +1,7 @@
 package com.gu.liveappversions.integration
 
 import com.gu.config.Config.Env
-import com.gu.liveappversions.Lambda
+import com.gu.liveappversions.ios.Lambda
 
 object IntegrationTest {
 

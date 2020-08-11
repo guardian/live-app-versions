@@ -101,10 +101,10 @@ Resources:
       Runtime: java8
       Timeout: 60
 
-  LiveAppVersionsLambda:
+  IosLiveAppVersionsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub live-app-versions-${Stage}
+      FunctionName: !Sub ios-live-app-versions-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
@@ -116,7 +116,27 @@ Resources:
           App: !Ref App
           APPLE_APP_ID: !Ref AppleAppId
       Description: Lambda function which retrieves the latest beta version from App Store Connect.
-      Handler: com.gu.liveappversions.Lambda::handler
+      Handler: com.gu.liveappversions.ios.Lambda::handler
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
+  AndroidLiveAppVersionsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub android-live-app-versions-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: Lambda function which retrieves the latest version/track information from Google Play.
+      Handler: com.gu.liveappversions.android.Lambda::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
@@ -129,16 +149,26 @@ Resources:
       Description: Triggers the lambdas in this project periodically to check for new deployments or completed releases
       ScheduleExpression: rate(5 minutes)
       Targets:
-        - Id: LiveAppVersionsLambda
-          Arn: !GetAtt LiveAppVersionsLambda.Arn
+        - Id: IosLiveAppVersionsLambda
+          Arn: !GetAtt IosLiveAppVersionsLambda.Arn
+        - Id: AndroidLiveAppVersionsLambda
+          Arn: !GetAtt AndroidLiveAppVersionsLambda.Arn
         - Id: IosDeploymentsLambda
           Arn: !GetAtt IosDeploymentsLambda.Arn
 
-  PollingEventLiveAppVersionsLambdaPermission:
+  PollingEventIosLiveAppVersionsLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt LiveAppVersionsLambda.Arn
+      FunctionName: !GetAtt IosLiveAppVersionsLambda.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt PollingEvent.Arn
+
+  PollingEventAndroidLiveAppVersionsLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt AndroidLiveAppVersionsLambda.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
@@ -150,7 +180,7 @@ Resources:
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
-  LiveAppVersionsFailureAlarm:
+  IosLiveAppVersionsFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
@@ -173,7 +203,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref LiveAppVersionsLambda
+                  Value: !Ref IosLiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
@@ -185,7 +215,48 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref LiveAppVersionsLambda
+                  Value: !Ref IosLiveAppVersionsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Threshold: 100
+
+  AndroidLiveAppVersionsFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      OKActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when retrieving or storing the latest Android versions in ${Stage}
+      Metrics:
+        - Id: e1
+          Label: Error percentage of lambda
+          Expression: "100*(m1/m2)"
+        - Id: m1
+          Label: Number of errors for lambda
+          MetricStat:
+            Metric:
+              MetricName: Errors
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref AndroidLiveAppVersionsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+        - Id: m2
+          Label: Number of invocations for lambda
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref AndroidLiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
