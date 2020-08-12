@@ -6,7 +6,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult }
 import com.gu.config.Aws
 import com.gu.config.Config.Env
-import com.gu.liveappversions.Lambda.logger
+import com.gu.liveappversions.ios.BuildOutput
+import com.gu.liveappversions.ios.Lambda.logger
 import io.circe.syntax._
 
 import scala.util.{ Failure, Success, Try }

@@ -1,8 +1,9 @@
-package com.gu.liveappversions
+package com.gu.liveappversions.ios
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
 import com.gu.config.Config.{ AppStoreConnectConfig, Env }
+import com.gu.liveappversions.S3Uploader
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.{ Failure, Success }

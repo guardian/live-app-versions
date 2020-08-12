@@ -6,7 +6,7 @@ deployments:
     type: aws-lambda
     parameters:
       bucket: mobile-dist
-      functionNames: [live-app-versions-, ios-deployments-]
+      functionNames: [android-live-app-versions-, ios-live-app-versions-, ios-deployments-]
       fileName: live-app-versions.jar
       prefixStack: false
     dependencies: [live-app-versions-cfn]
