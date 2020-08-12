@@ -14,9 +14,9 @@ object Lambda {
     logger.info(s"Starting $env")
     for {
       token <- Token.getToken(env)
-      tracks <- PlayDeveloperApi.getTrackInfo(token)
+      versions <- PlayDeveloperApi.getBetaAndProductionVersions(token)
     } yield {
-      logger.info(s"Retrieved track info: $tracks")
+      logger.info(s"Retrieved version info: $versions")
     }
 
   }

@@ -2,6 +2,7 @@ package com.gu.playdeveloperapi
 
 import com.google.auth.oauth2.AccessToken
 import com.gu.okhttp.SharedClient
+import com.gu.playdeveloperapi.Conversion.AndroidLiveAppVersions
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.parser._
@@ -47,18 +48,19 @@ object PlayDeveloperApi {
 
     }
 
-    def getTrackInfo(accessToken: AccessToken): Try[String] = {
+    def getBetaAndProductionVersions(accessToken: AccessToken): Try[AndroidLiveAppVersions] = {
       for {
         edit <- createEdit(accessToken)
         trackResponse <- listTrackInfo(accessToken, edit)
+        versions <- Conversion.toAndroidLiveAppVersions(trackResponse)
       } yield {
-        trackResponse.tracks.find(_.track == "production").toString
+        versions
       }
     }
 
     case class EditId(id: String)
 
-    case class Release(name: String)
+    case class Release(name: String, status: String)
     case class Track(track: String, releases: List[Release])
     case class TracksResponse(tracks: List[Track])
 
