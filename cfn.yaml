@@ -232,6 +232,8 @@ Resources:
       OKActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
       AlarmName: !Sub Failures when retrieving or storing the latest Android versions in ${Stage}
+      AlarmDescription: |
+        <<<Runbook|https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.vb63w7y2on5t>>>
       Metrics:
         - Id: e1
           Label: Error percentage of lambda
