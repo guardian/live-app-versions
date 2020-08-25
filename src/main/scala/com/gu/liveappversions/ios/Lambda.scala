@@ -3,7 +3,7 @@ package com.gu.liveappversions.ios
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
 import com.gu.config.Config.{ AppStoreConnectConfig, Env }
-import com.gu.liveappversions.S3Uploader
+import com.gu.liveappversions.S3Storage
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.{ Failure, Success }
@@ -24,7 +24,7 @@ object Lambda {
     val attempt = for {
       latestBetas <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
       buildOutput <- BuildOutput.findLatestBuildsWithExternalTesters(latestBetas)
-      uploadAttempt <- S3Uploader.attemptUpload(buildOutput, env, uploadBucketName)
+      uploadAttempt <- S3Storage.attemptUpload(buildOutput, env, uploadBucketName, "ios-live-app/recent-beta-releases.json")
     } yield uploadAttempt
     attempt match {
       case Success(_) =>
