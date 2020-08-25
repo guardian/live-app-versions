@@ -6,9 +6,8 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult }
 import com.gu.config.Aws
 import com.gu.config.Config.Env
-import com.gu.liveappversions.ios.BuildOutput
 import com.gu.liveappversions.ios.Lambda.logger
-import io.circe.syntax._
+import io.circe.Json
 
 import scala.util.{ Failure, Success, Try }
 
@@ -24,11 +23,11 @@ object S3Storage {
     s"reserved-paths$stagePrefix$partialKey"
   }
 
-  def attemptUpload(buildOutput: BuildOutput, env: Env, bucketName: String, partialKey: String): Try[PutObjectResult] = {
+  def attemptUpload(jsonToUpload: Json, env: Env, bucketName: String, partialKey: String): Try[PutObjectResult] = {
 
     val key = storageLocation(env, partialKey)
 
-    val buildAttributesStream: ByteArrayInputStream = new ByteArrayInputStream(buildOutput.asJson.toString().getBytes)
+    val buildAttributesStream: ByteArrayInputStream = new ByteArrayInputStream(jsonToUpload.toString().getBytes)
 
     val metadata = new ObjectMetadata()
     metadata.setContentType("application/json")
