@@ -1,9 +1,8 @@
-package com.gu.liveappversions
+package com.gu.liveappversions.ios
 
 import java.time.ZonedDateTime
 
 import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
-import com.gu.liveappversions.ios.BuildOutput
 import org.scalatest.FunSuite
 
 class BuildOutputTest extends FunSuite {

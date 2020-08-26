@@ -2,13 +2,16 @@ package com.gu.liveappversions
 
 import java.io.ByteArrayInputStream
 
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.{ CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult }
 import com.gu.config.Aws
 import com.gu.config.Config.Env
 import com.gu.liveappversions.ios.Lambda.logger
 import io.circe.Json
+import io.circe.syntax._
 
+import scala.io.Source
 import scala.util.{ Failure, Success, Try }
 
 object S3Storage {
@@ -18,14 +21,14 @@ object S3Storage {
     .withRegion(Aws.euWest1.getName)
     .build()
 
-  def storageLocation(env: Env, partialKey: String): String = {
+  def fullKey(env: Env, partialKey: String): String = {
     val stagePrefix = if (env.stage == "PROD") "/" else s"/${env.stage}/"
     s"reserved-paths$stagePrefix$partialKey"
   }
 
-  def attemptUpload(jsonToUpload: Json, env: Env, bucketName: String, partialKey: String): Try[PutObjectResult] = {
+  def putJson(jsonToUpload: Json, env: Env, bucketName: String, partialKey: String): Try[PutObjectResult] = {
 
-    val key = storageLocation(env, partialKey)
+    val key = fullKey(env, partialKey)
 
     val buildAttributesStream: ByteArrayInputStream = new ByteArrayInputStream(jsonToUpload.toString().getBytes)
 
@@ -51,6 +54,24 @@ object S3Storage {
         Failure(exception)
     }
 
+  }
+
+  def getJsonString(env: Env, bucketName: String, partialKey: String): Try[Option[String]] = {
+    val key = fullKey(env, partialKey)
+    Try {
+      val s3Object = s3Client.getObject(bucketName, key)
+      Source.fromInputStream(s3Object.getObjectContent).mkString
+    } match {
+      case Success(result) =>
+        logger.info(s"Successfully downloaded file from S3 (bucket: $bucketName | key: $key)")
+        Success(Some(result))
+      case Failure(amazonServiceException: AmazonServiceException) if (amazonServiceException.getStatusCode == 404) =>
+        logger.info(s"File was not present in s3 (bucket: $bucketName | key: $key)")
+        Success(None)
+      case Failure(exception) =>
+        logger.error(s"Failed to download file from S3 (bucket: $bucketName | key: $key) due to: $exception")
+        Failure(exception)
+    }
   }
 
 }

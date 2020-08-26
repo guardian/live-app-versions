@@ -25,7 +25,7 @@ object Lambda {
     val attempt = for {
       latestBetas <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
       buildOutput <- BuildOutput.findLatestBuildsWithExternalTesters(latestBetas)
-      uploadAttempt <- S3Storage.attemptUpload(buildOutput.asJson, env, uploadBucketName, "ios-live-app/recent-beta-releases.json")
+      uploadAttempt <- S3Storage.putJson(buildOutput.asJson, env, uploadBucketName, "ios-live-app/recent-beta-releases.json")
     } yield uploadAttempt
     UploadAttempt.handle(attempt)
   }
