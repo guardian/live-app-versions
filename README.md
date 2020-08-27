@@ -2,7 +2,7 @@
 
 ### android-live-app-versions
 
-Retrieves information about releases of the [Android Live App](https://github.com/guardian/android-news-app) from the [Play Developer API](https://developers.google.com/android-publisher#publishing).
+Retrieves information about releases of the [Android Live App](https://github.com/guardian/android-news-app) from the [Play Developer API](https://developers.google.com/android-publisher#publishing) and stores the results in S3.
 
 ### ios-live-app-versions
 
