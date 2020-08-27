@@ -77,7 +77,7 @@ Resources:
                   - s3:PutObject
                   - s3:PutObjectAcl
                   - s3:GetObject
-               Resource: !Sub
+                Resource: !Sub
                   - arn:aws:s3:::static-content-dist/${Path}*
                   - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
               - Effect: Allow
