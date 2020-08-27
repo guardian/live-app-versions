@@ -26,11 +26,11 @@ Parameters:
 Mappings:
   StageVariables:
     CODE:
-      UploadPath: reserved-paths/CODE/ios-live-app/
+      UploadPath: reserved-paths/CODE/*-live-app/
       ScheduleStatus: DISABLED
       AlarmActionsEnabled: FALSE
     PROD:
-      UploadPath: reserved-paths/ios-live-app/
+      UploadPath: reserved-paths/*-live-app/
       ScheduleStatus: ENABLED
       AlarmActionsEnabled: TRUE
 Resources:
@@ -69,16 +69,21 @@ Resources:
               Action:
                 - ssm:GetParametersByPath
               Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/${Stack}/${App}
-        - PolicyName: uploadBuildOutputToS3
+        - PolicyName: s3BuildOutput
           PolicyDocument:
             Statement:
-              Effect: Allow
-              Action:
-                - s3:PutObject
-                - s3:PutObjectAcl
-              Resource: !Sub
-                - arn:aws:s3:::static-content-dist/${Path}*
-                - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                Resource: !Sub
+                  - arn:aws:s3:::static-content-dist/${Path}*
+                  - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: arn:aws:s3:::static-content-dist
 
   IosDeploymentsLambda:
     Type: AWS::Lambda::Function
