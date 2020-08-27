@@ -26,11 +26,11 @@ Parameters:
 Mappings:
   StageVariables:
     CODE:
-      UploadPath: reserved-paths/CODE/
+      UploadPath: reserved-paths/CODE/*-live-app/
       ScheduleStatus: DISABLED
       AlarmActionsEnabled: FALSE
     PROD:
-      UploadPath: reserved-paths/
+      UploadPath: reserved-paths/*-live-app/
       ScheduleStatus: ENABLED
       AlarmActionsEnabled: TRUE
 Resources:
