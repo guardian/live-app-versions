@@ -69,13 +69,14 @@ Resources:
               Action:
                 - ssm:GetParametersByPath
               Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/${Stack}/${App}
-        - PolicyName: uploadBuildOutputToS3
+        - PolicyName: s3BuildOutput
           PolicyDocument:
             Statement:
               Effect: Allow
               Action:
                 - s3:PutObject
                 - s3:PutObjectAcl
+                - s3:GetObject
               Resource: !Sub
                 - arn:aws:s3:::static-content-dist/${Path}*
                 - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
