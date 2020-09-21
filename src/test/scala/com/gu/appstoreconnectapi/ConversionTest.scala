@@ -28,7 +28,7 @@ class ConversionTest extends FunSuite {
 
   test("combineModels should produce a list of LiveAppBetas from a valid App Store Connect response") {
     val buildsResponse = BuildsResponse(allBuildDetails, allBetaBuildDetails)
-    val result = Conversion.combineModels(buildsResponse)
+    val result = Conversion.combineBuildsResponseModels(buildsResponse)
     val expectedResults = List(
       LiveAppBeta("12345", "id123", now, "INTERNAL", "EXTERNAL"),
       LiveAppBeta("12344", "id124", now, "INTERNAL", "EXTERNAL"),
@@ -40,13 +40,13 @@ class ConversionTest extends FunSuite {
 
   test("combineModels should fail if there are objects missing from the App Store Connect response") {
     val buildsResponse = BuildsResponse(allBuildDetails.drop(1), allBetaBuildDetails)
-    val result = Conversion.combineModels(buildsResponse)
+    val result = Conversion.combineBuildsResponseModels(buildsResponse)
     assert(result.isFailure)
   }
 
   test("combineModels should fail if the ids in the App Store Connect response do not match") {
     val buildsResponse = BuildsResponse(List(buildDetails), List(betaBuildDetails.copy(id = "fakeId")))
-    val result = Conversion.combineModels(buildsResponse)
+    val result = Conversion.combineBuildsResponseModels(buildsResponse)
     assert(result.isFailure)
   }
 

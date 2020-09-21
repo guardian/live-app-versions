@@ -2,13 +2,13 @@ package com.gu.appstoreconnectapi
 
 import java.time.{ ZoneOffset, ZonedDateTime }
 
-import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, combineModels }
-import com.gu.config.Config.{ AppStoreConnectConfig, ExternalTesterConfig, ExternalTesterGroup }
+import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction, combineBuildsResponseModels, combineAppStoreVersionsResponseModels }
+import com.gu.config.Config.{ AppStoreConnectConfig, ExternalTesterConfig }
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder.Result
 import io.circe.parser.decode
 import io.circe.{ Decoder, HCursor }
-import okhttp3.{ MediaType, Request, RequestBody, Response }
+import okhttp3.{ MediaType, Request, RequestBody }
 import io.circe.parser._
 import io.circe.generic.auto._
 import org.slf4j.{ Logger, LoggerFactory }
@@ -33,6 +33,9 @@ object AppStoreConnectApi {
   case class BetaBuildAttributes(internalBuildState: String, externalBuildState: String)
   case class BetaBuildDetails(id: String, attributes: BetaBuildAttributes)
   case class BuildsResponse(data: List[BuildDetails], included: List[BetaBuildDetails])
+  case class AppStoreVersionAttributes(versionString: String, appStoreState: String)
+  case class AppStoreVersion(attributes: AppStoreVersionAttributes)
+  case class AppStoreVersionsResponse(data: List[AppStoreVersion], included: List[BuildDetails])
 
   val appStoreConnectBaseUrl = "https://api.appstoreconnect.apple.com/v1"
 
@@ -46,8 +49,25 @@ object AppStoreConnectApi {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
       buildsResponse <- decode[BuildsResponse](bodyAsString).toTry
-      liveAppBetas <- combineModels(buildsResponse)
+      liveAppBetas <- combineBuildsResponseModels(buildsResponse)
     } yield liveAppBetas
+  }
+
+  def getLatestProductionBuild(token: String, appStoreConnectConfig: AppStoreConnectConfig): Try[LiveAppProduction] = {
+    val buildsQuery = s"/apps/${appStoreConnectConfig.appleAppId}/appStoreVersions?filter[appStoreState]=READY_FOR_SALE&include=build"
+    val request = new Request.Builder()
+      .url(s"$appStoreConnectBaseUrl$buildsQuery")
+      .addHeader("Authorization", s"Bearer $token")
+      .build
+    for {
+      httpResponse <- Try(SharedClient.client.newCall(request).execute)
+      bodyAsString <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
+      appStoreVersionsResponse <- decode[AppStoreVersionsResponse](bodyAsString).toTry
+      latestProductionRelease <- combineAppStoreVersionsResponseModels(appStoreVersionsResponse)
+    } yield {
+      logger.info(s"The latest production release is: $latestProductionRelease")
+      latestProductionRelease
+    }
   }
 
   def submitForBetaTesting(token: String, buildId: String): Try[Unit] = {

@@ -1,7 +1,7 @@
 package com.gu.iosdeployments
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
+import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
 import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
 import com.gu.config.Config
 import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
@@ -46,15 +46,24 @@ object Lambda {
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
           case (_, None) =>
-            Try(logger.info(s"Found running deployment ${runningDeployment.version}, but build was not present in App Store Connect response"))
+            Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response"))
           case _ =>
-            Try(logger.info(s"No action was required for ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
+            Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
         }
       case None =>
-        Try(logger.info("No running deployments found."))
+        Try(logger.info("No running beta deployments found."))
     }
   }
 
+  def handleProductionDeployment(maybeDeployment: Option[RunningLiveAppDeployment], latestProduction: LiveAppProduction, gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
+    case Some(productionDeployment) if latestProduction.version == productionDeployment.version =>
+      logger.info(s"Production deployment for version ${productionDeployment.version} is complete...")
+      GitHubApi.markDeploymentAsSuccess(gitHubConfig, productionDeployment)
+    case Some(productionDeployment) =>
+      Try(logger.info(s"In progress production deployment ${productionDeployment.version} has still not been released. Latest production version in App Store Connect is ${latestProduction.version}"))
+    case None =>
+      Try(logger.info("No running production deployments found."))
+  }
 
   def process(env: Env): Unit = {
     logger.info("Loading configuration...")
@@ -65,11 +74,13 @@ object Lambda {
     val result = for {
       runningDeployments <- GitHubApi.getRunningDeployments(gitHubConfig)
       appStoreConnectBetaBuilds <- AppStoreConnectApi.getLatestBetaBuilds(appStoreConnectToken, appStoreConnectConfig)
-      // Process one running deployment per lambda execution
-      // In practice it's extremely unlikely that there will be two concurrent deployments anyway
-      handleBeta <- handleBetaDeployment(env, runningDeployments.headOption, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
+      appStoreConnectProductionBuild <- AppStoreConnectApi.getLatestProductionBuild(appStoreConnectToken, appStoreConnectConfig)
+      maybeBetaDeployment = runningDeployments.find(_.environment.contains("beta"))
+      maybeProductionDeployment = runningDeployments.find(_.environment == "production")
+      handleBeta <- handleBetaDeployment(env, maybeBetaDeployment, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
+      handleProduction <- handleProductionDeployment(maybeProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
     } yield {
-      handleBeta
+      handleProduction
     }
 
     result match {
