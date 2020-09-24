@@ -44,7 +44,7 @@ object GitHubApi {
     val query =
       """
     |{
-    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 3) { edges { node { databaseId, createdAt, environment, state, payload, latestStatus { createdAt, description  } } } } } }"
+    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, payload, latestStatus { createdAt, description  } } } } } }"
     |}
     |""".stripMargin
     for {
