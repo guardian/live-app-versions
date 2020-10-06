@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 object Conversion {
 
   case class LiveAppBeta(version: String, buildId: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
-  case class LiveAppProduction(appStoreVersion: String, buildNumber: String, releaseDate: ZonedDateTime)
+  case class LiveAppProduction(appStoreVersion: String, buildNumber: String, releaseDate: String)
 
   implicit val liveAppProductionEncoder: Encoder[LiveAppProduction] = deriveEncoder[LiveAppProduction]
 
