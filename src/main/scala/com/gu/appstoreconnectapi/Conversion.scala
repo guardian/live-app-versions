@@ -3,6 +3,8 @@ package com.gu.appstoreconnectapi
 import java.time.ZonedDateTime
 
 import com.gu.appstoreconnectapi.AppStoreConnectApi.{AppStoreVersionsResponse, BuildsResponse}
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
 
 import scala.util.{Failure, Success, Try}
 
@@ -10,6 +12,8 @@ object Conversion {
 
   case class LiveAppBeta(version: String, buildId: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
   case class LiveAppProduction(versionString: String, version: String)
+
+  implicit val liveAppProductionEncoder: Encoder[LiveAppProduction] = deriveEncoder[LiveAppProduction]
 
   case object CombinedResponseException extends Throwable
 

@@ -7,8 +7,6 @@ import com.gu.liveappversions.{ S3Storage, UploadAttempt }
 import io.circe.syntax._
 import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{ Failure, Success }
-
 object Lambda {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
@@ -24,9 +22,12 @@ object Lambda {
     val token = JwtTokenBuilder.buildToken(appStoreConnectConfig)
     val attempt = for {
       latestBetas <- AppStoreConnectApi.getLatestBetaBuilds(token, appStoreConnectConfig)
+      latestProduction <- AppStoreConnectApi.getLatestProductionBuild(token, appStoreConnectConfig)
       buildOutput <- BuildOutput.findLatestBuildsWithExternalTesters(latestBetas)
-      uploadAttempt <- S3Storage.putJson(buildOutput.asJson, env, uploadBucketName, "ios-live-app/recent-beta-releases.json")
-    } yield uploadAttempt
+      betaUploadAttempt <- S3Storage.putJson(buildOutput.asJson, env, uploadBucketName, "ios-live-app/recent-beta-releases.json")
+      // TODO append to file
+      productionUploadAttempt <- S3Storage.putJson(latestProduction.asJson, env, uploadBucketName, "ios-live-app/recent-production-releases.json")
+    } yield productionUploadAttempt
     UploadAttempt.handle(attempt)
   }
 
