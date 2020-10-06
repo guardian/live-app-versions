@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 object Conversion {
 
   case class LiveAppBeta(version: String, buildId: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
-  case class LiveAppProduction(versionString: String, version: String)
+  case class LiveAppProduction(appStoreVersion: String, buildNumber: String, releaseDate: ZonedDateTime)
 
   implicit val liveAppProductionEncoder: Encoder[LiveAppProduction] = deriveEncoder[LiveAppProduction]
 
@@ -45,7 +45,11 @@ object Conversion {
     if (appStoreVersionsResponse.data.size != 1 || appStoreVersionsResponse.included.size != 1) {
       Failure(CombinedResponseException)
     } else {
-      Success(LiveAppProduction(appStoreVersionsResponse.data.head.attributes.versionString, appStoreVersionsResponse.included.head.attributes.version))
+      Success(LiveAppProduction(
+        appStoreVersionsResponse.data.head.attributes.versionString,
+        appStoreVersionsResponse.included.head.attributes.version,
+        appStoreVersionsResponse.data.head.attributes.earliestReleaseDate)
+      )
     }
   }
 

@@ -56,11 +56,11 @@ object Lambda {
   }
 
   def handleProductionDeployment(maybeDeployment: Option[RunningLiveAppDeployment], latestProduction: LiveAppProduction, gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
-    case Some(productionDeployment) if latestProduction.version == productionDeployment.version =>
+    case Some(productionDeployment) if latestProduction.buildNumber == productionDeployment.version =>
       logger.info(s"Production deployment for version ${productionDeployment.version} is complete...")
       GitHubApi.markDeploymentAsSuccess(gitHubConfig, productionDeployment)
     case Some(productionDeployment) =>
-      Try(logger.info(s"In progress production deployment ${productionDeployment.version} has still not been released. Latest production version in App Store Connect is ${latestProduction.version}"))
+      Try(logger.info(s"In progress production deployment ${productionDeployment.version} has still not been released. Latest production version in App Store Connect is ${latestProduction.buildNumber}"))
     case None =>
       Try(logger.info("No running production deployments found."))
   }

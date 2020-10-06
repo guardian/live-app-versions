@@ -33,7 +33,7 @@ object AppStoreConnectApi {
   case class BetaBuildAttributes(internalBuildState: String, externalBuildState: String)
   case class BetaBuildDetails(id: String, attributes: BetaBuildAttributes)
   case class BuildsResponse(data: List[BuildDetails], included: List[BetaBuildDetails])
-  case class AppStoreVersionAttributes(versionString: String, appStoreState: String)
+  case class AppStoreVersionAttributes(versionString: String, appStoreState: String, earliestReleaseDate: ZonedDateTime, releaseType: String)
   case class AppStoreVersion(attributes: AppStoreVersionAttributes)
   case class AppStoreVersionsResponse(data: List[AppStoreVersion], included: List[BuildDetails])
 
