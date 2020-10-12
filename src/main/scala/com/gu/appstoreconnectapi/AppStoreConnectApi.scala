@@ -48,6 +48,7 @@ object AppStoreConnectApi {
     for {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
+      _ = logger.info(s"Response from Apple is:\n $bodyAsString")
       buildsResponse <- decode[BuildsResponse](bodyAsString).toTry
       liveAppBetas <- combineBuildsResponseModels(buildsResponse)
     } yield liveAppBetas
