@@ -9,7 +9,7 @@ import scala.util.{Failure, Success, Try}
 object Conversion {
 
   case class LiveAppBeta(version: String, buildId: String, uploadedDate: ZonedDateTime, internalBuildState: String, externalBuildState: String)
-  case class LiveAppProduction(versionString: String, version: String)
+  case class LiveAppProduction(versionString: String, version: String, appStoreVersionState: String)
 
   case object CombinedResponseException extends Throwable
 
@@ -37,11 +37,22 @@ object Conversion {
     }
   }
 
-  def combineAppStoreVersionsResponseModels(appStoreVersionsResponse: AppStoreVersionsResponse): Try[LiveAppProduction] = {
-    if (appStoreVersionsResponse.data.size != 1 || appStoreVersionsResponse.included.size != 1) {
+  def combineAppStoreVersionsResponseModels(appStoreVersionsResponse: AppStoreVersionsResponse): Try[List[LiveAppProduction]] = {
+    val appStoreVersionsIds = appStoreVersionsResponse.data.map(_.id)
+    val buildDetailsIds = appStoreVersionsResponse.included.map(_.id)
+    if (appStoreVersionsIds != buildDetailsIds) {
       Failure(CombinedResponseException)
     } else {
-      Success(LiveAppProduction(appStoreVersionsResponse.data.head.attributes.versionString, appStoreVersionsResponse.included.head.attributes.version))
+      val productionVersions = appStoreVersionsResponse.data.map {
+        appStoreVersion =>
+          val buildDetails = appStoreVersionsResponse.included.find(_.id == appStoreVersion.id).get
+          LiveAppProduction(
+            appStoreVersion.attributes.versionString,
+            buildDetails.attributes.version,
+            appStoreVersion.attributes.appStoreState
+          )
+      }
+      Success(productionVersions)
     }
   }
 

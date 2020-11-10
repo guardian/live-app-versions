@@ -34,7 +34,7 @@ object AppStoreConnectApi {
   case class BetaBuildDetails(id: String, attributes: BetaBuildAttributes)
   case class BuildsResponse(data: List[BuildDetails], included: List[BetaBuildDetails])
   case class AppStoreVersionAttributes(versionString: String, appStoreState: String)
-  case class AppStoreVersion(attributes: AppStoreVersionAttributes)
+  case class AppStoreVersion(id: String, attributes: AppStoreVersionAttributes)
   case class AppStoreVersionsResponse(data: List[AppStoreVersion], included: List[BuildDetails])
 
   val appStoreConnectBaseUrl = "https://api.appstoreconnect.apple.com/v1"
@@ -53,8 +53,8 @@ object AppStoreConnectApi {
     } yield liveAppBetas
   }
 
-  def getLatestProductionBuild(token: String, appStoreConnectConfig: AppStoreConnectConfig): Try[LiveAppProduction] = {
-    val buildsQuery = s"/apps/${appStoreConnectConfig.appleAppId}/appStoreVersions?filter[appStoreState]=READY_FOR_SALE&include=build"
+  def getLatestProductionBuilds(token: String, appStoreConnectConfig: AppStoreConnectConfig): Try[List[LiveAppProduction]] = {
+    val buildsQuery = s"/apps/${appStoreConnectConfig.appleAppId}/appStoreVersions?limit=20&sort=-version&include=build"
     val request = new Request.Builder()
       .url(s"$appStoreConnectBaseUrl$buildsQuery")
       .addHeader("Authorization", s"Bearer $token")
