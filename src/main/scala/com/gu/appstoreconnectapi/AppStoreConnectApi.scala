@@ -54,7 +54,7 @@ object AppStoreConnectApi {
   }
 
   def getLatestProductionBuilds(token: String, appStoreConnectConfig: AppStoreConnectConfig): Try[List[LiveAppProduction]] = {
-    val buildsQuery = s"/apps/${appStoreConnectConfig.appleAppId}/appStoreVersions?limit=20&sort=-version&include=build"
+    val buildsQuery = s"/apps/${appStoreConnectConfig.appleAppId}/appStoreVersions?limit=20&include=build"
     val request = new Request.Builder()
       .url(s"$appStoreConnectBaseUrl$buildsQuery")
       .addHeader("Authorization", s"Bearer $token")
