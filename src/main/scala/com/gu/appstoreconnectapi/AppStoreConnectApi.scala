@@ -33,8 +33,11 @@ object AppStoreConnectApi {
   case class BetaBuildAttributes(internalBuildState: String, externalBuildState: String)
   case class BetaBuildDetails(id: String, attributes: BetaBuildAttributes)
   case class BuildsResponse(data: List[BuildDetails], included: List[BetaBuildDetails])
+  case class AppStoreVersionsBuildData(id: String)
+  case class AppStoreVersionsBuild(data: Option[AppStoreVersionsBuildData])
+  case class AppStoreVersionRelationships(build: AppStoreVersionsBuild)
   case class AppStoreVersionAttributes(versionString: String, appStoreState: String)
-  case class AppStoreVersion(id: String, attributes: AppStoreVersionAttributes)
+  case class AppStoreVersion(id: String, attributes: AppStoreVersionAttributes, relationships: AppStoreVersionRelationships)
   case class AppStoreVersionsResponse(data: List[AppStoreVersion], included: List[BuildDetails])
 
   val appStoreConnectBaseUrl = "https://api.appstoreconnect.apple.com/v1"

@@ -38,14 +38,15 @@ object Conversion {
   }
 
   def combineAppStoreVersionsResponseModels(appStoreVersionsResponse: AppStoreVersionsResponse): Try[List[LiveAppProduction]] = {
-    val appStoreVersionsIds = appStoreVersionsResponse.data.map(_.id)
-    val buildDetailsIds = appStoreVersionsResponse.included.map(_.id)
-    if (appStoreVersionsIds != buildDetailsIds) {
+    val appStoreVersionsWithBuild = appStoreVersionsResponse.data.filter(_.relationships.build.data.isDefined)
+    val appStoreVersionsIds = appStoreVersionsWithBuild.map(_.id)
+    val buildDetailsIds = appStoreVersionsResponse.data.flatMap(_.relationships.build.data.map(_.id))
+    if (appStoreVersionsIds.size != buildDetailsIds.size) {
       Failure(CombinedResponseException)
     } else {
-      val productionVersions = appStoreVersionsResponse.data.map {
+      val productionVersions = appStoreVersionsWithBuild.map {
         appStoreVersion =>
-          val buildDetails = appStoreVersionsResponse.included.find(_.id == appStoreVersion.id).get
+          val buildDetails = appStoreVersionsResponse.included.find(_.id == appStoreVersion.relationships.build.data.map(_.id).get).get
           LiveAppProduction(
             appStoreVersion.attributes.versionString,
             buildDetails.attributes.version,
