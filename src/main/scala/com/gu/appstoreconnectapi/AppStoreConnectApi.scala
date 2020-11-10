@@ -66,10 +66,10 @@ object AppStoreConnectApi {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
       appStoreVersionsResponse <- decode[AppStoreVersionsResponse](bodyAsString).toTry
-      latestProductionRelease <- combineAppStoreVersionsResponseModels(appStoreVersionsResponse)
+      latestProductionReleases <- combineAppStoreVersionsResponseModels(appStoreVersionsResponse)
     } yield {
-      logger.info(s"The latest production release is: $latestProductionRelease")
-      latestProductionRelease
+      logger.info(s"The latest production releases are: $latestProductionReleases")
+      latestProductionReleases
     }
   }
 
