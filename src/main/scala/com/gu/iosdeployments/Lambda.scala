@@ -1,15 +1,15 @@
 package com.gu.iosdeployments
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
-import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
+import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction }
+import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
 import com.gu.config.Config
-import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
+import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
 import com.gu.githubapi.Conversion.RunningLiveAppDeployment
 import com.gu.githubapi.GitHubApi
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object Lambda {
 
@@ -55,12 +55,22 @@ object Lambda {
     }
   }
 
-  def handleProductionDeployment(maybeDeployment: Option[RunningLiveAppDeployment], latestProduction: LiveAppProduction, gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
-    case Some(productionDeployment) if latestProduction.version == productionDeployment.version =>
-      logger.info(s"Production deployment for version ${productionDeployment.version} is complete...")
-      GitHubApi.markDeploymentAsSuccess(gitHubConfig, productionDeployment)
+  def handleProductionDeployment(maybeDeployment: Option[RunningLiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
     case Some(productionDeployment) =>
-      Try(logger.info(s"In progress production deployment ${productionDeployment.version} has still not been released. Latest production version in App Store Connect is ${latestProduction.version}"))
+      val attemptToFindProductionVersion = latestProductionVersions.find(_.version == productionDeployment.version)
+      attemptToFindProductionVersion match {
+        case Some(LiveAppProduction(_, _, "READY_FOR_SALE")) =>
+          logger.info(s"Production deployment for version ${productionDeployment.version} is complete...")
+          GitHubApi.markDeploymentAsSuccess(gitHubConfig, productionDeployment)
+        // There are a few different ways a build can be rejected, see: https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionstate
+        case Some(LiveAppProduction(_, _, status)) if status.contains("REJECTED") =>
+          logger.info(s"Production deployment for version ${productionDeployment.version} has been rejected...")
+          GitHubApi.markDeploymentAsFailure(gitHubConfig, productionDeployment)
+        case Some(liveAppProduction) =>
+          Try(logger.info(s"No action required for production deployment. Full details are: ${liveAppProduction}"))
+        case None =>
+          Try(logger.info(s"Found running production deployment ${productionDeployment.version}, but build was not present in App Store Connect response"))
+      }
     case None =>
       Try(logger.info("No running production deployments found."))
   }
@@ -74,7 +84,7 @@ object Lambda {
     val result = for {
       runningDeployments <- GitHubApi.getRunningDeployments(gitHubConfig)
       appStoreConnectBetaBuilds <- AppStoreConnectApi.getLatestBetaBuilds(appStoreConnectToken, appStoreConnectConfig)
-      appStoreConnectProductionBuild <- AppStoreConnectApi.getLatestProductionBuild(appStoreConnectToken, appStoreConnectConfig)
+      appStoreConnectProductionBuild <- AppStoreConnectApi.getLatestProductionBuilds(appStoreConnectToken, appStoreConnectConfig)
       maybeBetaDeployment = runningDeployments.find(_.environment.contains("beta"))
       maybeProductionDeployment = runningDeployments.find(_.environment == "production")
       handleBeta <- handleBetaDeployment(env, maybeBetaDeployment, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
