@@ -1,20 +1,25 @@
 package com.gu.githubapi
 
+import java.time.ZonedDateTime
+
 import com.gu.githubapi.Conversion.RunningLiveAppDeployment
 import com.gu.githubapi.GitHubApi.{ Deployment, LatestStatus }
 import org.scalatest.FunSuite
 
 class ConversionTest extends FunSuite {
 
+  val now = ZonedDateTime.now()
+
   val deployment = Deployment(
     123,
     "external-beta",
     "PENDING",
-    Some(LatestStatus(Some("12345"))))
+    Some(LatestStatus(Some("12345"))),
+    now)
 
   test("runningLiveAppDeployments should collect pending deployments with version info") {
     val result = Conversion.runningLiveAppDeployments(List(deployment))
-    val expected = List(RunningLiveAppDeployment("12345", "external-beta", 123))
+    val expected = List(RunningLiveAppDeployment("12345", "external-beta", 123, now))
     assert(result == expected)
   }
 
