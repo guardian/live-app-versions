@@ -48,14 +48,14 @@ object Lambda {
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
           case (_, None) =>
-            Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response"))
-          case _ =>
             if (olderThanOneHour(runningDeployment)) {
               logger.info(s"Deployment was created at ${runningDeployment.createdAt}, but there is still no record of the associated build in App Store Connect...")
               GitHubApi.markDeploymentAsFailure(gitHubConfig, runningDeployment)
             } else {
-              Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
+              Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response yet..."))
             }
+          case _ =>
+            Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
         }
       case None =>
         Try(logger.info("No running beta deployments found."))
