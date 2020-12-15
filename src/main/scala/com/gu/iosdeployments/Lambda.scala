@@ -39,10 +39,10 @@ object Lambda {
           case ("external-beta", Some(LiveAppBeta(_, _, _, _, "IN_BETA_TESTING"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} is complete...")
             GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
-          case ("external-beta", Some(build@LiveAppBeta(_, _, _, "IN_BETA_TESTING", "READY_FOR_BETA_SUBMISSION"))) =>
+          case ("external-beta", Some(build @ LiveAppBeta(_, _, _, "IN_BETA_TESTING", "READY_FOR_BETA_SUBMISSION"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be submitted for review...")
             AppStoreConnectApi.submitForBetaTesting(appStoreConnectToken, build.buildId)
-          case ("external-beta", Some(build@LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
+          case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
           case (_, None) =>
