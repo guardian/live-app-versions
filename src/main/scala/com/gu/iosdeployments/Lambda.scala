@@ -1,15 +1,17 @@
 package com.gu.iosdeployments
 
+import java.time.ZonedDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction }
-import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
+import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
+import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
 import com.gu.config.Config
-import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
+import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
 import com.gu.githubapi.Conversion.RunningLiveAppDeployment
 import com.gu.githubapi.GitHubApi
-import org.slf4j.{ Logger, LoggerFactory }
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object Lambda {
 
@@ -48,7 +50,12 @@ object Lambda {
           case (_, None) =>
             Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response"))
           case _ =>
-            Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
+            if (olderThanOneHour(runningDeployment)) {
+              logger.info(s"Deployment was created at ${runningDeployment.createdAt}, but there is still no record of the associated build in App Store Connect...")
+              GitHubApi.markDeploymentAsFailure(gitHubConfig, runningDeployment)
+            } else {
+              Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
+            }
         }
       case None =>
         Try(logger.info("No running beta deployments found."))
@@ -73,6 +80,11 @@ object Lambda {
       }
     case None =>
       Try(logger.info("No running production deployments found."))
+  }
+
+  def olderThanOneHour(deployment: RunningLiveAppDeployment): Boolean = {
+    val oneHourAgo = ZonedDateTime.now().minusHours(1)
+    deployment.createdAt.isBefore(oneHourAgo)
   }
 
   def process(env: Env): Unit = {
