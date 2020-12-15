@@ -49,7 +49,7 @@ object Lambda {
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
           case (_, None) =>
             if (olderThanOneHour(runningDeployment)) {
-              logger.info(s"Deployment was created at ${runningDeployment.createdAt}, but there is still no record of the associated build in App Store Connect...")
+              logger.info(s"Deployment for ${runningDeployment.version} was created at ${runningDeployment.createdAt}, but there is still no record of the associated build in App Store Connect...")
               GitHubApi.markDeploymentAsFailure(gitHubConfig, runningDeployment)
             } else {
               Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response yet..."))
