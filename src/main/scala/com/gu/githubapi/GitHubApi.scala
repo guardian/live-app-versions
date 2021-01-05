@@ -1,5 +1,7 @@
 package com.gu.githubapi
 
+import java.time.ZonedDateTime
+
 import com.gu.config.Config.GitHubConfig
 import com.gu.githubapi.Conversion.{ RunningLiveAppDeployment, runningLiveAppDeployments }
 import com.gu.okhttp.SharedClient
@@ -18,7 +20,7 @@ object GitHubApi {
   case class GitHubApiException(message: String) extends Throwable(message: String)
 
   case class Node(node: Deployment)
-  case class Deployment(databaseId: Int, environment: String, state: String, latestStatus: Option[LatestStatus])
+  case class Deployment(databaseId: Int, environment: String, state: String, latestStatus: Option[LatestStatus], createdAt: ZonedDateTime)
   case class LatestStatus(description: Option[String])
 
   val deploymentsDecoder = Decoder[List[Node]].prepare(
@@ -44,7 +46,7 @@ object GitHubApi {
     val query =
       """
     |{
-    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, payload, latestStatus { createdAt, description  } } } } } }"
+    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, latestStatus { createdAt, description  } } } } } }"
     |}
     |""".stripMargin
     for {

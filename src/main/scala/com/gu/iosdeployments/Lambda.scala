@@ -1,15 +1,17 @@
 package com.gu.iosdeployments
 
+import java.time.ZonedDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction }
-import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
+import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
+import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
 import com.gu.config.Config
-import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
+import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
 import com.gu.githubapi.Conversion.RunningLiveAppDeployment
 import com.gu.githubapi.GitHubApi
-import org.slf4j.{ Logger, LoggerFactory }
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object Lambda {
 
@@ -39,14 +41,14 @@ object Lambda {
           case ("external-beta", Some(LiveAppBeta(_, _, _, _, "IN_BETA_TESTING"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} is complete...")
             GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
-          case ("external-beta", Some(build@LiveAppBeta(_, _, _, "IN_BETA_TESTING", "READY_FOR_BETA_SUBMISSION"))) =>
+          case ("external-beta", Some(build @ LiveAppBeta(_, _, _, "IN_BETA_TESTING", "READY_FOR_BETA_SUBMISSION"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be submitted for review...")
             AppStoreConnectApi.submitForBetaTesting(appStoreConnectToken, build.buildId)
-          case ("external-beta", Some(build@LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
+          case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
           case (_, None) =>
-            Try(logger.info(s"Found running beta deployment ${runningDeployment.version}, but build was not present in App Store Connect response"))
+            notPresentInAppStoreConnect(runningDeployment, gitHubConfig)
           case _ =>
             Try(logger.info(s"No action was required for beta deployment ${runningDeployment.version}. Full details are: $attemptToFindBeta"))
         }
@@ -69,10 +71,26 @@ object Lambda {
         case Some(liveAppProduction) =>
           Try(logger.info(s"No action required for production deployment. Full details are: ${liveAppProduction}"))
         case None =>
-          Try(logger.info(s"Found running production deployment ${productionDeployment.version}, but build was not present in App Store Connect response"))
+          notPresentInAppStoreConnect(productionDeployment, gitHubConfig)
       }
     case None =>
       Try(logger.info("No running production deployments found."))
+  }
+
+  def notPresentInAppStoreConnect(runningDeployment: RunningLiveAppDeployment, gitHubConfig: GitHubConfig) = {
+
+    def olderThanOneHour(deployment: RunningLiveAppDeployment): Boolean = {
+      val oneHourAgo = ZonedDateTime.now().minusHours(1)
+      deployment.createdAt.isBefore(oneHourAgo)
+    }
+
+    if (olderThanOneHour(runningDeployment)) {
+      logger.warn(s"Unable to correlate running ${runningDeployment.environment} deployment for version ${runningDeployment.version} with App Store Connect response after one hour. Giving up...")
+      GitHubApi.markDeploymentAsFailure(gitHubConfig, runningDeployment)
+    } else {
+      Try(logger.info(s"Found running ${runningDeployment.environment} deployment for version ${runningDeployment.version}. Waiting for App Store Connect response to catch-up..."))
+    }
+
   }
 
   def process(env: Env): Unit = {
