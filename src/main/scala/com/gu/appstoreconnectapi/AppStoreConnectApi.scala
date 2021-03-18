@@ -109,10 +109,6 @@ object AppStoreConnectApi {
                   |{
                   |  "data": [
                   |     {
-                  |       "id": "${externalTesterConfig.group1.id}",
-                  |         "type": "betaGroups"
-                  |     },
-                  |     {
                   |       "id": "${externalTesterConfig.group2.id}",
                   |         "type": "betaGroups"
                   |     }
