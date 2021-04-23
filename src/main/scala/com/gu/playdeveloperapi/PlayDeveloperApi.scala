@@ -5,14 +5,16 @@ import com.gu.okhttp.SharedClient
 import com.gu.playdeveloperapi.Conversion.AndroidLiveAppVersions
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import io.circe.parser._
-import okhttp3.{ Request, RequestBody }
+import okhttp3.{Request, RequestBody}
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.Try
 
 object PlayDeveloperApi {
 
   object PlayDeveloperApi {
+
+    val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
     val baseUrl = "https://www.googleapis.com/androidpublisher/v3/applications/com.guardian/edits"
 
@@ -28,7 +30,11 @@ object PlayDeveloperApi {
         httpResponse <- Try(SharedClient.client.newCall(request).execute)
         bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API", httpResponse)
         editId <- decode[EditId](bodyAsString).toTry
-      } yield editId
+      } yield {
+        logger.info(s"The response for edit ID: $bodyAsString")
+        logger.info(s"The edit ID is: $editId")
+        editId
+      }
 
     }
 
@@ -44,7 +50,11 @@ object PlayDeveloperApi {
         httpResponse <- Try(SharedClient.client.newCall(request).execute)
         bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API", httpResponse)
         tracksResponse <- decode[TracksResponse](bodyAsString).toTry
-      } yield tracksResponse
+      } yield {
+        logger.info(s"The response for tracks: $bodyAsString")
+        logger.info(s"The track and release is: $tracksResponse")
+        tracksResponse
+      }
 
     }
 
