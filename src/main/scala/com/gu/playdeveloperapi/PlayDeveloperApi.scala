@@ -28,7 +28,7 @@ object PlayDeveloperApi {
 
       for {
         httpResponse <- Try(SharedClient.client.newCall(request).execute)
-        bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API", httpResponse)
+        bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API Response: (edits.insert) ", httpResponse)
         editId <- decode[EditId](bodyAsString).toTry
       } yield {
         logger.info(s"The response for edit ID: $bodyAsString")
@@ -48,7 +48,7 @@ object PlayDeveloperApi {
 
       for {
         httpResponse <- Try(SharedClient.client.newCall(request).execute)
-        bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API", httpResponse)
+        bodyAsString <- SharedClient.getResponseBodyIfSuccessful("Google Play Developer API Response: (edits.tracks.list) ", httpResponse)
         tracksResponse <- decode[TracksResponse](bodyAsString).toTry
       } yield {
         logger.info(s"The response for tracks: $bodyAsString")
