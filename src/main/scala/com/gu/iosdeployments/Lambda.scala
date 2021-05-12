@@ -64,7 +64,7 @@ object Lambda {
     case Some(productionDeployment) =>
       val attemptToFindProductionVersion = latestProductionVersions.find(_.version == productionDeployment.version)
       attemptToFindProductionVersion match {
-        case Some(LiveAppProduction(_, _, "READY_FOR_SALE")) =>
+        case Some(LiveAppProduction(_, _, status)) if status.contains("READY_FOR_SALE") =>
           logger.info(s"Production deployment for version ${productionDeployment.version} is complete...")
           GitHubApi.markDeploymentAsSuccess(gitHubConfig, productionDeployment)
         // There are a few different ways a build can be rejected, see: https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionstate
