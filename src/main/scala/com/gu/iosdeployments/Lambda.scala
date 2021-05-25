@@ -47,6 +47,9 @@ object Lambda {
           case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "BETA_APPROVED"))) =>
             logger.info(s"External beta deployment for ${runningDeployment.version} can now be distributed to users...")
             AppStoreConnectApi.distributeToExternalTesters(appStoreConnectToken, build.buildId, externalTesterConfig)
+          case ("external-beta", Some(build @ LiveAppBeta(_, _, _, _, "BETA_REJECTED"))) =>
+            logger.info(s"External beta for ${runningDeployment.version} was rejected.")
+            GitHubApi.markDeploymentAsFailure(gitHubConfig, runningDeployment)
           case (_, Some(LiveAppBeta(_, _, _, "EXPIRED", "EXPIRED"))) =>
             logger.info(s"Beta deployment for ${runningDeployment.version} was (presumably) successful, but beta build was expired before deployment completed...")
             GitHubApi.markDeploymentAsSuccess(gitHubConfig, runningDeployment)
