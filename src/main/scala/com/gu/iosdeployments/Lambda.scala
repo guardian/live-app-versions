@@ -118,8 +118,10 @@ object Lambda {
     }
 
     result match {
-      case Success(_) => logger.info("Successfully checked/updated deployment status")
-      case Failure(exception) => logger.error(s"Failed to check or update deployment status due to: ${exception}", exception)
+      case Success(_) => logger.info("Successfully checked deployment status")
+      case Failure(exception) =>
+        logger.error(s"Failed to check deployment status due to: ${exception}", exception)
+        throw exception
     }
 
   }
