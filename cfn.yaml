@@ -26,11 +26,11 @@ Parameters:
 Mappings:
   StageVariables:
     CODE:
-      UploadPath: reserved-paths/CODE/ios-live-app/
+      UploadPath: reserved-paths/CODE/*-live-app/
       ScheduleStatus: DISABLED
       AlarmActionsEnabled: FALSE
     PROD:
-      UploadPath: reserved-paths/ios-live-app/
+      UploadPath: reserved-paths/*-live-app/
       ScheduleStatus: ENABLED
       AlarmActionsEnabled: TRUE
 Resources:
@@ -69,16 +69,21 @@ Resources:
               Action:
                 - ssm:GetParametersByPath
               Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/${Stack}/${App}
-        - PolicyName: uploadBuildOutputToS3
+        - PolicyName: s3BuildOutput
           PolicyDocument:
             Statement:
-              Effect: Allow
-              Action:
-                - s3:PutObject
-                - s3:PutObjectAcl
-              Resource: !Sub
-                - arn:aws:s3:::static-content-dist/${Path}*
-                - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                Resource: !Sub
+                  - arn:aws:s3:::static-content-dist/${Path}*
+                  - Path: !FindInMap [StageVariables, !Ref Stage, UploadPath]
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: arn:aws:s3:::static-content-dist
 
   IosDeploymentsLambda:
     Type: AWS::Lambda::Function
@@ -101,10 +106,10 @@ Resources:
       Runtime: java8
       Timeout: 60
 
-  Lambda:
+  IosLiveAppVersionsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub live-app-versions-${Stage}
+      FunctionName: !Sub ios-live-app-versions-${Stage}
       Code:
         S3Bucket:
           Ref: DeployBucket
@@ -116,7 +121,27 @@ Resources:
           App: !Ref App
           APPLE_APP_ID: !Ref AppleAppId
       Description: Lambda function which retrieves the latest beta version from App Store Connect.
-      Handler: com.gu.liveappversions.Lambda::handler
+      Handler: com.gu.liveappversions.ios.Lambda::handler
+      MemorySize: 1024
+      Role: !GetAtt ExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+
+  AndroidLiveAppVersionsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub android-live-app-versions-${Stage}
+      Code:
+        S3Bucket:
+          Ref: DeployBucket
+        S3Key: !Sub ${Stack}/${Stage}/${App}/${App}.jar
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          Stack: !Ref Stack
+          App: !Ref App
+      Description: Lambda function which retrieves the latest version/track information from Google Play.
+      Handler: com.gu.liveappversions.android.Lambda::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
       Runtime: java8
@@ -126,32 +151,51 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       State: !FindInMap [StageVariables, !Ref Stage, ScheduleStatus]
-      Description: Triggers the lambda periodically, allowing us to check whether a new version has been released
+      Description: Triggers the lambdas in this project periodically to check for new deployments or completed releases
       ScheduleExpression: rate(5 minutes)
       Targets:
-        - Id: Lambda
-          Arn: !GetAtt Lambda.Arn
+        - Id: IosLiveAppVersionsLambda
+          Arn: !GetAtt IosLiveAppVersionsLambda.Arn
+        - Id: AndroidLiveAppVersionsLambda
+          Arn: !GetAtt AndroidLiveAppVersionsLambda.Arn
+        - Id: IosDeploymentsLambda
+          Arn: !GetAtt IosDeploymentsLambda.Arn
 
-  PollingEventLambdaPermission:
+  PollingEventIosLiveAppVersionsLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt Lambda.Arn
+      FunctionName: !GetAtt IosLiveAppVersionsLambda.Arn
       Principal: events.amazonaws.com
       SourceArn: !GetAtt PollingEvent.Arn
 
-  FailureAlarm:
+  PollingEventAndroidLiveAppVersionsLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt AndroidLiveAppVersionsLambda.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt PollingEvent.Arn
+
+  PollingEventIosDeploymentsLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt IosDeploymentsLambda.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt PollingEvent.Arn
+
+  IosLiveAppVersionsFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
-      AlarmName: !Sub Failures when retrieving/storing latest iOS beta version in ${Stage}
+      OKActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when retrieving or storing the latest iOS versions in ${Stage}
       AlarmDescription: |
-        Tips for debugging this alert:
-        * Check the logs at https://logs.gutools.co.uk/s/mobile/goto/0538f002572d0d01f37e4f0b9212dc3a
-        * Check App Store Connect API status at: https://developer.apple.com/system-status/
-        * View the source code at https://github.com/guardian/live-app-versions
+        <<<Runbook|https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.f2qd026kxlds>>>
       Metrics:
         - Id: e1
           Label: Error percentage of lambda
@@ -164,7 +208,7 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref Lambda
+                  Value: !Ref IosLiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
@@ -176,10 +220,97 @@ Resources:
               Namespace: AWS/Lambda
               Dimensions:
                 - Name: FunctionName
-                  Value: !Ref Lambda
+                  Value: !Ref IosLiveAppVersionsLambda
             Period: 3600
             Stat: Sum
           ReturnData: false
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Threshold: 100
+
+  AndroidLiveAppVersionsFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      OKActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when retrieving or storing the latest Android versions in ${Stage}
+      AlarmDescription: |
+        <<<Runbook|https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.vb63w7y2on5t>>>
+      Metrics:
+        - Id: e1
+          Label: Error percentage of lambda
+          Expression: "100*(m1/m2)"
+        - Id: m1
+          Label: Number of errors for lambda
+          MetricStat:
+            Metric:
+              MetricName: Errors
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref AndroidLiveAppVersionsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+        - Id: m2
+          Label: Number of invocations for lambda
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref AndroidLiveAppVersionsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Threshold: 100
+
+  IosDeploymentsFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: !FindInMap [StageVariables, !Ref Stage, AlarmActionsEnabled]
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      OKActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mobile-server-side
+      AlarmName: !Sub Failures when checking or updating iOS beta deployments in ${Stage}
+      AlarmDescription: |
+        <<<Runbook|https://docs.google.com/document/d/1by6RLfo_d-6wyAp7OoQquv4tZYUR6FYhAn0GZkJtqH8/edit#heading=h.fxgskya8ndu0>>>
+      Metrics:
+        - Id: e1
+          Label: Error percentage of lambda
+          Expression: "100*(m1/m2)"
+        - Id: m1
+          Label: Number of errors for lambda
+          MetricStat:
+            Metric:
+              MetricName: Errors
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref IosDeploymentsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+        - Id: m2
+          Label: Number of invocations for lambda
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref IosDeploymentsLambda
+            Period: 3600
+            Stat: Sum
+          ReturnData: false
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Threshold: 100
+

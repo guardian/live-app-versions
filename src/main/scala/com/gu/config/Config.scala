@@ -51,6 +51,28 @@ object Config {
     }
   }
 
+  case class GoogleServiceAccount(json: String)
+
+  object GoogleServiceAccount {
+
+    def apply(env: Env): GoogleServiceAccount = {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
+        case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
+      }
+      GoogleServiceAccount(ssmPrivateConfig.getString("google.serviceAccountJson"))
+    }
+
+  }
+
+  case class ExternalTesterGroup(id: String, name: String)
+  case class ExternalTesterConfig(group1: ExternalTesterGroup, group2: ExternalTesterGroup)
+  val externalTesterConfigForProd = ExternalTesterConfig(
+    ExternalTesterGroup("b3ee0d21-fe7e-487a-9f81-5ea993b6e860", "External Testers 1"),
+    ExternalTesterGroup("53ab9951-d444-4107-87ce-dbfbb2c898e5", "External Testers 2"))
+  val externalTesterConfigForTesting = ExternalTesterConfig(
+    ExternalTesterGroup("2c761621-6849-46c5-a936-fecc1187d736", "Live App Versions Testers 1"),
+    ExternalTesterGroup("d3fc87fc-7416-41ae-8ff9-2a1d8a6c619a", "Live App Versions Testers 2"))
+
   case class GitHubConfig(token: String)
 
   object GitHubConfig {

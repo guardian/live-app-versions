@@ -1,5 +1,7 @@
 package com.gu.githubapi
 
+import java.time.ZonedDateTime
+
 import com.gu.config.Config.GitHubConfig
 import com.gu.githubapi.Conversion.{ RunningLiveAppDeployment, runningLiveAppDeployments }
 import com.gu.okhttp.SharedClient
@@ -18,7 +20,7 @@ object GitHubApi {
   case class GitHubApiException(message: String) extends Throwable(message: String)
 
   case class Node(node: Deployment)
-  case class Deployment(databaseId: Int, environment: String, state: String, latestStatus: Option[LatestStatus])
+  case class Deployment(databaseId: Int, environment: String, state: String, latestStatus: Option[LatestStatus], createdAt: ZonedDateTime)
   case class LatestStatus(description: Option[String])
 
   val deploymentsDecoder = Decoder[List[Node]].prepare(
@@ -44,7 +46,7 @@ object GitHubApi {
     val query =
       """
     |{
-    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 3) { edges { node { databaseId, createdAt, environment, state, payload, latestStatus { createdAt, description  } } } } } }"
+    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, latestStatus { createdAt, description  } } } } } }"
     |}
     |""".stripMargin
     for {
@@ -53,6 +55,31 @@ object GitHubApi {
       deployments <- extractDeployments(bodyAsString).toTry
     } yield {
       runningLiveAppDeployments(deployments)
+    }
+  }
+
+  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+    markDeploymentAsFinished(gitHubConfig, deployment, "success")
+  }
+
+  def markDeploymentAsFailure(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+    markDeploymentAsFinished(gitHubConfig, deployment, "failure")
+  }
+
+  def markDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment, finishedState: String): Try[Unit] = {
+    val url = s"$restApiUrl/repos/guardian/ios-live/deployments/${deployment.gitHubDatabaseId.toString}/statuses"
+    val body =
+      s"""
+         |{
+         |  "state": "$finishedState",
+         |  "description": "${deployment.version}"
+         |}
+         |""".stripMargin
+    for {
+      httpResponse <- Try(SharedClient.client.newCall(gitHubPostRequest(url, body, gitHubConfig)).execute)
+      _ <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
+    } yield {
+      ()
     }
   }
 

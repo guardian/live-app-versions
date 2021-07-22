@@ -1,9 +1,9 @@
-package com.gu.liveappversions
+package com.gu.liveappversions.ios
 
 import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
-import com.gu.liveappversions.Lambda.logger
+import com.gu.liveappversions.ios.Lambda.logger
 import io.circe.generic.semiauto.deriveEncoder
-import io.circe.{ Encoder, HCursor, Json }
+import io.circe.{ Encoder, Json }
 
 import scala.util.{ Failure, Success, Try }
 
