@@ -18,8 +18,7 @@ scalacOptions ++= Seq(
 val circeVersion = "0.12.3"
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.714",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.1", // Pin a more recent version to avoid Snyk vulnerabilities introduced by s3 sdk
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.12.101",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
   "com.google.auth" % "google-auth-library-oauth2-http" % "0.20.0",
