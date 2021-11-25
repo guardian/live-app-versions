@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import com.gu.AwsIdentity
 import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
-import com.turo.pushy.apns.auth.ApnsSigningKey
+import com.eatthepath.pushy.apns.auth.ApnsSigningKey
 
 object Config {
 
