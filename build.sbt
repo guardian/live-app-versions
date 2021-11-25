@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.8.2",
   "com.pauldijou" %% "jwt-core" % "4.2.0",
   "com.squareup.okhttp3" % "okhttp" % "4.3.1",
-  "com.turo" % "pushy" % "0.13.9",
+  "com.eatthepath" % "pushy" % "0.15.0",
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
