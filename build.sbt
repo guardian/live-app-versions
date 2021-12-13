@@ -20,7 +20,7 @@ val circeVersion = "0.12.3"
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.101",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "com.amazonaws" % "aws-lambda-java-log4j2" % "1.2.0",
+  "com.amazonaws" % "aws-lambda-java-log4j2" % "1.3.0",
   "com.google.auth" % "google-auth-library-oauth2-http" % "0.20.0",
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
   "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.15.0",
