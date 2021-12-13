@@ -20,10 +20,10 @@ val circeVersion = "0.12.3"
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.101",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "com.amazonaws" % "aws-lambda-java-log4j2" % "1.1.0",
+  "com.amazonaws" % "aws-lambda-java-log4j2" % "1.3.0",
   "com.google.auth" % "google-auth-library-oauth2-http" % "0.20.0",
   "com.gu" %% "simple-configuration-ssm" % "1.4.1",
-  "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.8.2",
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.15.0",
   "com.pauldijou" %% "jwt-core" % "4.2.0",
   "com.squareup.okhttp3" % "okhttp" % "4.3.1",
   "com.eatthepath" % "pushy" % "0.15.0",
@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
   "org.slf4j" % "slf4j-api" % "1.7.30",
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  "junit" % "junit" % "4.13.1"
 )
 
 enablePlugins(RiffRaffArtifact)
