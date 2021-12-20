@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets
 import com.gu.AwsIdentity
 import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey
+import software.amazon.awssdk.auth.credentials.{ AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, DefaultCredentialsProvider => DefaultCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
 
 object Config {
 
@@ -32,7 +33,7 @@ object Config {
 
     def apply(env: Env): AppStoreConnectConfig = {
 
-      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), CredentialsProvider.credentialsv2) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
 
@@ -56,7 +57,7 @@ object Config {
   object GoogleServiceAccount {
 
     def apply(env: Env): GoogleServiceAccount = {
-      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), CredentialsProvider.credentialsv2) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
       GoogleServiceAccount(ssmPrivateConfig.getString("google.serviceAccountJson"))
@@ -77,12 +78,18 @@ object Config {
 
   object GitHubConfig {
     def apply(env: Env): GitHubConfig = {
-      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), Aws.credentials("mobile")) {
+      val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), CredentialsProvider.credentialsv2) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
       val token = ssmPrivateConfig.getString("github.token")
       GitHubConfig(token)
     }
+  }
+
+  object CredentialsProvider {
+    lazy val credentialsv2: AwsCredentialsProviderChainV2 = AwsCredentialsProviderChainV2.of(
+      ProfileCredentialsProviderV2.builder.profileName("mobile").build,
+      DefaultCredentialsProviderV2.create)
   }
 
 }

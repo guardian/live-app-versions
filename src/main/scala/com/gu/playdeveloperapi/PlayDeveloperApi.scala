@@ -5,7 +5,7 @@ import com.gu.okhttp.SharedClient
 import com.gu.playdeveloperapi.Conversion.AndroidLiveAppVersions
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import okhttp3.{Request, RequestBody}
+import okhttp3.{ Request, RequestBody }
 import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.util.Try
