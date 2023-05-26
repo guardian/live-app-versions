@@ -1,16 +1,16 @@
 name: Build
 
 on:
-#  push:
-#    branches:
-#      - main
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
-# we might need this to allow queued workflows to interrupt previous runs
-#concurrency:
-#  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-#  cancel-in-progress: true
+# allow queued workflows to interrupt previous runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   id-token: write
