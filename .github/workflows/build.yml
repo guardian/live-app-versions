@@ -40,6 +40,7 @@ jobs:
         uses: guardian/actions-riff-raff@v2
         with:
           app: live-app-versions
+          buildNumberOffset: 172
           configPath: riff-raff.yaml
           contentDirectories: |
             live-app-versions:
