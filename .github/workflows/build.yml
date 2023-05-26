@@ -43,6 +43,6 @@ jobs:
           configPath: riff-raff.yaml
           contentDirectories: |
             live-app-versions:
-              - target/live-app-versions.jar
+              - target/scala-2.12/live-app-versions.jar
             live-app-versions-cfn:
               - cfn.yaml
