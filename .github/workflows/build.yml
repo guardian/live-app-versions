@@ -33,5 +33,16 @@ jobs:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
 
-      - name: Compile, test and upload to riff raff
-        run: sbt clean compile test riffRaffUpload
+      - name: Clean, compile and test
+        run: sbt clean compile test
+
+      - name: Upload to riff-raff
+        uses: guardian/actions-riff-raff@v2
+        with:
+          app: live-app-versions
+          configPath: riff-raff.yaml
+          contentDirectories: |
+            live-app-versions:
+              - target/live-app-versions.jar
+            live-app-versions-cfn:
+              - cfn.yaml
