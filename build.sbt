@@ -35,8 +35,6 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.13.1"
 )
 
-enablePlugins(RiffRaffArtifact)
-
 assemblyJarName := s"${name.value}.jar"
 assembly / assemblyMergeStrategy := {
   case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.last
@@ -45,8 +43,3 @@ assembly / assemblyMergeStrategy := {
   case "META-INF/MANIFEST.MF" => MergeStrategy.discard
   case x => MergeStrategy.first
 }
-
-riffRaffPackageType := assembly.value
-riffRaffUploadArtifactBucket := Option("riffraff-artifact")
-riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources += (file("cfn.yaml"), s"${name.value}-cfn/cfn.yaml")
