@@ -20,3 +20,7 @@ The project is implemented in Scala as a collection of AWS Lambdas. The lambdas 
 The infrastructure for serving JSON via S3 and Fastly is shared with [`mobile-static`](https://github.com/guardian/mobile-static#infrastructure).
 
 You can view the latest iOS beta builds via https://mobile.guardianapis.com/static/reserved-paths/ios-live-app/recent-beta-releases.json.
+
+## Build
+
+Note that this project now uses a github [workflow](.github/workflows/build.yml) to build the artefacts for deployment. The project name in riff raff is `mobile::live-app-versions`
