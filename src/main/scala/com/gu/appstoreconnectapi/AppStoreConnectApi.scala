@@ -50,6 +50,7 @@ object AppStoreConnectApi {
       .build
     for {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
+      _ = logger.info(s"Get beta builds rate limit header: ${httpResponse.header("user-hour-lim")}")
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
       buildsResponse <- decode[BuildsResponse](bodyAsString).toTry
       liveAppBetas <- combineBuildsResponseModels(buildsResponse)
