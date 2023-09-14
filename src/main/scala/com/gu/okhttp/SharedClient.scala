@@ -3,6 +3,7 @@ package com.gu.okhttp
 import okhttp3.{ OkHttpClient, Response }
 import org.slf4j.{ Logger, LoggerFactory }
 
+import java.util.concurrent.TimeUnit
 import scala.util.{ Failure, Success, Try }
 
 case class ApiException(message: String) extends Throwable(message: String)
@@ -11,7 +12,10 @@ object SharedClient {
 
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  val client = new OkHttpClient
+  val client = new OkHttpClient.Builder()
+    .readTimeout(40, TimeUnit.SECONDS)
+    .connectTimeout(40, TimeUnit.SECONDS)
+    .build()
 
   def getResponseBodyIfSuccessful(apiName: String, response: Response): Try[String] = {
     val responseBody = response.body().string()
