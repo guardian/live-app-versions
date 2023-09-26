@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser" % circeVersion,
   "org.slf4j" % "slf4j-api" % "1.7.30",
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "junit" % "junit" % "4.13.1"
+  "junit" % "junit" % "4.13.2"
 )
 
 assemblyJarName := s"${name.value}.jar"
