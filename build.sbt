@@ -6,7 +6,7 @@ description:= "Lambda function which retrieves the latest beta version from App 
 
 version := "1.0"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.18"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -15,7 +15,7 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-val circeVersion = "0.12.3"
+val circeVersion = "0.14.6"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.577",
@@ -30,9 +30,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "org.slf4j" % "slf4j-api" % "1.7.30",
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "junit" % "junit" % "4.13.1"
+  "org.slf4j" % "slf4j-api" % "1.7.36",
+  "org.scalatest" %% "scalatest" % "3.0.9" % "test",
+  "junit" % "junit" % "4.13.2"
 )
 
 assemblyJarName := s"${name.value}.jar"

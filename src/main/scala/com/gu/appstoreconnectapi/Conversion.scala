@@ -30,8 +30,7 @@ object Conversion {
             buildId = buildDetails.id,
             uploadedDate = buildDetails.attributes.uploadedDate,
             internalBuildState = betaBuildDetails.attributes.internalBuildState,
-            externalBuildState = betaBuildDetails.attributes.externalBuildState,
-          )
+            externalBuildState = betaBuildDetails.attributes.externalBuildState)
       }
       Success(liveAppBetas)
     }
@@ -50,8 +49,7 @@ object Conversion {
           LiveAppProduction(
             appStoreVersion.attributes.versionString,
             buildDetails.attributes.version,
-            appStoreVersion.attributes.appStoreState
-          )
+            appStoreVersion.attributes.appStoreState)
       }
       Success(productionVersions)
     }
