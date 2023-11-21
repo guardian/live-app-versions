@@ -2,9 +2,9 @@ package com.gu.playdeveloperapi
 
 import com.gu.playdeveloperapi.Conversion.Version
 import com.gu.playdeveloperapi.PlayDeveloperApi.PlayDeveloperApi.{ Release, Track }
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConversionTest extends FunSuite {
+class ConversionTest extends AnyFunSuite {
 
   val betaTrack = Track("beta", releases = List(Release("1.2.123", "completed")))
   val productionTrack = Track("production", releases = List(Release("1.2.123", "completed")))
