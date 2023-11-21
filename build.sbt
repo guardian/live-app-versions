@@ -30,7 +30,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "org.slf4j" % "slf4j-api" % "1.7.36",
+  "org.slf4j" % "slf4j-api" % "2.0.9",
   "org.scalatest" %% "scalatest" % "3.2.17" % "test",
   "junit" % "junit" % "4.13.2"
 )
