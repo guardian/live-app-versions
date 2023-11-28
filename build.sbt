@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "1.7.36",
   "org.scalatest" %% "scalatest" % "3.0.9" % "test",
   "junit" % "junit" % "4.13.2",
-  "io.netty" % "netty-codec-http2" % "4.1.100.Final",
+  "io.netty" % "netty-codec-http2" % "4.1.101.Final",
   "io.netty" % "netty-handler-proxy" % "4.1.100.Final",
   "io.netty" % "netty-resolver-dns" % "4.1.100.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.1.100.Final",
