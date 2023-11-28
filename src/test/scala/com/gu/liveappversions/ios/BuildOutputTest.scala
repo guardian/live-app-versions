@@ -3,9 +3,9 @@ package com.gu.liveappversions.ios
 import java.time.ZonedDateTime
 
 import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 
-class BuildOutputTest extends AnyFunSuite {
+class BuildOutputTest extends FunSuite {
 
   val now = ZonedDateTime.now()
 

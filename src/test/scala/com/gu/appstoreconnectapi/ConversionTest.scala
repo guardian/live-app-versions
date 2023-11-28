@@ -3,11 +3,11 @@ package com.gu.appstoreconnectapi
 import java.time.ZonedDateTime
 import com.gu.appstoreconnectapi.AppStoreConnectApi.{ BetaBuildAttributes, BetaBuildDetails, BuildAttributes, BuildDetails, BuildsResponse }
 import com.gu.appstoreconnectapi.Conversion.LiveAppBeta
+import org.scalatest.FunSuite
 
 import scala.util.{ Failure, Success }
-import org.scalatest.funsuite.AnyFunSuite
 
-class ConversionTest extends AnyFunSuite {
+class ConversionTest extends FunSuite {
 
   val now = ZonedDateTime.now()
   val buildDetails = BuildDetails("id123", BuildAttributes("12345", now))

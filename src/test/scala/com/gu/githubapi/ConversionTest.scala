@@ -4,9 +4,9 @@ import java.time.ZonedDateTime
 
 import com.gu.githubapi.Conversion.RunningLiveAppDeployment
 import com.gu.githubapi.GitHubApi.{ Deployment, LatestStatus }
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 
-class ConversionTest extends AnyFunSuite {
+class ConversionTest extends FunSuite {
 
   val now = ZonedDateTime.now()
 

@@ -2,9 +2,9 @@ package com.gu.appstoreconnectapi
 
 import java.time.ZonedDateTime
 
-import com.gu.appstoreconnectapi.AppStoreConnectApi.{ AppStoreVersionsResponse, BuildsResponse }
+import com.gu.appstoreconnectapi.AppStoreConnectApi.{AppStoreVersionsResponse, BuildsResponse}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object Conversion {
 

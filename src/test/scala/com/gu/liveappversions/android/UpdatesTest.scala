@@ -1,9 +1,9 @@
 package com.gu.liveappversions.android
 
 import com.gu.playdeveloperapi.Conversion.{ AndroidLiveAppVersions, Version }
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.FunSuite
 
-class UpdatesTest extends AnyFunSuite {
+class UpdatesTest extends FunSuite {
 
   val newVersion = Version("1.2.4")
   val existingVersion = Version("1.2.3")
