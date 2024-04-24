@@ -6,7 +6,7 @@ description:= "Lambda function which retrieves the latest beta version from App 
 
 version := "1.0"
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.13"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -21,22 +21,22 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.688",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.3",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
-  "com.google.auth" % "google-auth-library-oauth2-http" % "0.27.0",
-  "com.gu" %% "simple-configuration-ssm" % "1.5.8",
-  "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.17.2",
-  "com.pauldijou" %% "jwt-core" % "4.3.0",
-  "com.squareup.okhttp3" % "okhttp" % "4.9.3",
-  "com.eatthepath" % "pushy" % "0.15.2",
+  "com.google.auth" % "google-auth-library-oauth2-http" % "1.23.0",
+  "com.gu" %% "simple-configuration-ssm" % "1.7.0",
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.23.1",
+  "com.pauldijou" %% "jwt-core" % "5.0.0",
+  "com.squareup.okhttp3" % "okhttp" % "4.12.0",
+  "com.eatthepath" % "pushy" % "0.15.4",
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-  "org.slf4j" % "slf4j-api" % "2.0.9",
-  "org.scalatest" %% "scalatest" % "3.2.17" % "test",
+  "org.slf4j" % "slf4j-api" % "2.0.12",
+  "org.scalatest" %% "scalatest" % "3.2.18" % "test",
   "junit" % "junit" % "4.13.2",
-  "io.netty" % "netty-codec-http2" % "4.1.101.Final",
-  "io.netty" % "netty-handler-proxy" % "4.1.101.Final",
-  "io.netty" % "netty-resolver-dns" % "4.1.101.Final",
-  "io.netty" % "netty-transport-native-epoll" % "4.1.101.Final",
+  "io.netty" % "netty-codec-http2" % "4.1.107.Final",
+  "io.netty" % "netty-handler-proxy" % "4.1.107.Final",
+  "io.netty" % "netty-resolver-dns" % "4.1.107.Final",
+  "io.netty" % "netty-transport-native-epoll" % "4.1.107.Final",
 )
 
 assemblyJarName := s"${name.value}.jar"
