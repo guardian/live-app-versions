@@ -103,7 +103,7 @@ Resources:
       Handler: com.gu.iosdeployments.Lambda::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 240
 
   IosLiveAppVersionsLambda:
@@ -124,7 +124,7 @@ Resources:
       Handler: com.gu.liveappversions.ios.Lambda::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 60
 
   AndroidLiveAppVersionsLambda:
@@ -144,7 +144,7 @@ Resources:
       Handler: com.gu.liveappversions.android.Lambda::handler
       MemorySize: 1024
       Role: !GetAtt ExecutionRole.Arn
-      Runtime: java11
+      Runtime: java21
       Timeout: 60
 
   PollingEvent:
