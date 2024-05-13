@@ -24,3 +24,14 @@ You can view the latest iOS beta builds via https://mobile.guardianapis.com/stat
 ## Build
 
 Note that this project now uses a github [workflow](.github/workflows/build.yml) to build the artefacts for deployment. The project name in riff raff is `mobile::live-app-versions`
+
+## Testing in CODE
+
+Enable the [rule](https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/default/rules/live-app-versions-CODE-PollingEvent-895CZLHBBP9C)
+to poll the lambdas.
+
+Click on the targets tab to find a link to each of the lambdas.
+
+On the monitor tab on the lambda console, click view cloudwatch logs.
+
+Check for a successful invocation of the lambda when the schedule runs
