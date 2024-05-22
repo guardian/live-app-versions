@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-codec-http2" % "4.1.110.Final",
   "io.netty" % "netty-handler-proxy" % "4.1.110.Final",
   "io.netty" % "netty-resolver-dns" % "4.1.110.Final",
-  "io.netty" % "netty-transport-native-epoll" % "4.1.109.Final",
+  "io.netty" % "netty-transport-native-epoll" % "4.1.110.Final",
 )
 
 assemblyJarName := s"${name.value}.jar"
