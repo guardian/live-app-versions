@@ -33,10 +33,10 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "2.0.13",
   "org.scalatest" %% "scalatest" % "3.2.18" % "test",
   "junit" % "junit" % "4.13.2",
-  "io.netty" % "netty-codec-http2" % "4.1.109.Final",
-  "io.netty" % "netty-handler-proxy" % "4.1.109.Final",
-  "io.netty" % "netty-resolver-dns" % "4.1.109.Final",
-  "io.netty" % "netty-transport-native-epoll" % "4.1.109.Final",
+  "io.netty" % "netty-codec-http2" % "4.1.110.Final",
+  "io.netty" % "netty-handler-proxy" % "4.1.110.Final",
+  "io.netty" % "netty-resolver-dns" % "4.1.110.Final",
+  "io.netty" % "netty-transport-native-epoll" % "4.1.110.Final",
 )
 
 assemblyJarName := s"${name.value}.jar"
