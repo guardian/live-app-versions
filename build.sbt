@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.13.2",
   "io.netty" % "netty-codec-http2" % "4.1.111.Final",
   "io.netty" % "netty-handler-proxy" % "4.1.112.Final",
-  "io.netty" % "netty-resolver-dns" % "4.1.111.Final",
+  "io.netty" % "netty-resolver-dns" % "4.1.112.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.1.111.Final",
 )
 
