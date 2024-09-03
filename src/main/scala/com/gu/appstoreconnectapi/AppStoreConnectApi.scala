@@ -115,6 +115,18 @@ object AppStoreConnectApi {
                   |     {
                   |       "id": "${externalTesterConfig.group3.id}",
                   |         "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group4.id}",
+                  |         "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group5.id}",
+                  |         "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group6.id}",
+                  |         "type": "betaGroups"
                   |     }
                   |  ]
                   |}
@@ -128,7 +140,8 @@ object AppStoreConnectApi {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
     } yield {
-      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1} and ${externalTesterConfig.group3}")
+      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1}, ${externalTesterConfig.group3}, " +
+        s"${externalTesterConfig.group4}, ${externalTesterConfig.group5}, and ${externalTesterConfig.group6}")
     }
   }
 

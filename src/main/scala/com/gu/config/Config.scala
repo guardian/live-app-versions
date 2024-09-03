@@ -66,9 +66,16 @@ object Config {
   }
 
   case class ExternalTesterGroup(id: String, name: String)
-  case class ExternalTesterConfig(group1: ExternalTesterGroup, group3: ExternalTesterGroup)
+  case class ExternalTesterConfig(group1: ExternalTesterGroup,
+                                  group3: ExternalTesterGroup,
+                                  group4: ExternalTesterGroup,
+                                  group5: ExternalTesterGroup,
+                                  group6: ExternalTesterGroup)
   val externalTesterConfigForProd = ExternalTesterConfig(
     ExternalTesterGroup("b3ee0d21-fe7e-487a-9f81-5ea993b6e860", "External Testers 1"),
+    ExternalTesterGroup("a84bf09f-adf2-403e-a69e-8636cba7cedd", "External Testers 3"),
+    ExternalTesterGroup("71e65c76-50b3-412f-8f95-c0195e8716ee", "External Testers 4"),
+    ExternalTesterGroup("75de0034-ffe3-475d-bba9-73016808d473", "External Testers 5"),
     ExternalTesterGroup("3f5f1a35-dd71-4e11-8643-b20d0939c071", "Guardian Staff"))
   val externalTesterConfigForTesting = ExternalTesterConfig(
     ExternalTesterGroup("2c761621-6849-46c5-a936-fecc1187d736", "Live App Versions Testers 1"),
