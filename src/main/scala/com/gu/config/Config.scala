@@ -79,6 +79,9 @@ object Config {
     ExternalTesterGroup("3f5f1a35-dd71-4e11-8643-b20d0939c071", "Guardian Staff"))
   val externalTesterConfigForTesting = ExternalTesterConfig(
     ExternalTesterGroup("2c761621-6849-46c5-a936-fecc1187d736", "Live App Versions Testers 1"),
+    ExternalTesterGroup("a84bf09f-adf2-403e-a69e-8636cba7cedd", "External Testers 3"),
+    ExternalTesterGroup("71e65c76-50b3-412f-8f95-c0195e8716ee", "External Testers 4"),
+    ExternalTesterGroup("75de0034-ffe3-475d-bba9-73016808d473", "External Testers 5"),
     ExternalTesterGroup("3f5f1a35-dd71-4e11-8643-b20d0939c071", "Guardian Staff"))
 
   case class GitHubConfig(token: String)
