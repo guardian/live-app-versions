@@ -15,7 +15,7 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-val circeVersion = "0.14.9"
+val circeVersion = "0.14.10"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.771",
