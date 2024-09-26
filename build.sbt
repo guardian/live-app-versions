@@ -6,7 +6,7 @@ description:= "Lambda function which retrieves the latest beta version from App 
 
 version := "1.0"
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.15"
 
 scalacOptions ++= Seq(
   "-deprecation",
