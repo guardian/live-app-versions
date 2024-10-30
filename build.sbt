@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.1.114.Final",
   "io.netty" % "netty-resolver-dns" % "4.1.114.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.1.114.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.0"
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.1"
 )
 
 assemblyJarName := s"${name.value}.jar"
