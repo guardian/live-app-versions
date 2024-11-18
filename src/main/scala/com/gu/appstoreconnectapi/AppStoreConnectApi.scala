@@ -110,23 +110,27 @@ object AppStoreConnectApi {
                   |  "data": [
                   |     {
                   |       "id": "${externalTesterConfig.group1.id}",
-                  |         "type": "betaGroups"
+                  |       "type": "betaGroups"
+                  |     },
+                  |     {
+                  |       "id": "${externalTesterConfig.group2.id}",
+                  |       "type": "betaGroups"
                   |     },
                   |     {
                   |       "id": "${externalTesterConfig.group3.id}",
-                  |         "type": "betaGroups"
+                  |       "type": "betaGroups"
                   |     },
                   |     {
                   |       "id": "${externalTesterConfig.group4.id}",
-                  |         "type": "betaGroups"
+                  |       "type": "betaGroups"
                   |     },
                   |     {
                   |       "id": "${externalTesterConfig.group5.id}",
-                  |         "type": "betaGroups"
+                  |       "type": "betaGroups"
                   |     },
                   |     {
                   |       "id": "${externalTesterConfig.group6.id}",
-                  |         "type": "betaGroups"
+                  |       "type": "betaGroups"
                   |     }
                   |  ]
                   |}
@@ -140,8 +144,8 @@ object AppStoreConnectApi {
       httpResponse <- Try(SharedClient.client.newCall(request).execute)
       _ <- SharedClient.getResponseBodyIfSuccessful("App Store Connect API", httpResponse)
     } yield {
-      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1}, ${externalTesterConfig.group3}, " +
-        s"${externalTesterConfig.group4}, ${externalTesterConfig.group5}, and ${externalTesterConfig.group6}")
+      logger.info(s"Successfully distributed build to ${externalTesterConfig.group1}, ${externalTesterConfig.group2}, " +
+        s"${externalTesterConfig.group3}, ${externalTesterConfig.group4}, ${externalTesterConfig.group5}, and ${externalTesterConfig.group6}")
     }
   }
 
