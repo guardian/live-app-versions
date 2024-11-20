@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.777",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.3",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
-  "com.google.auth" % "google-auth-library-oauth2-http" % "1.29.0",
+  "com.google.auth" % "google-auth-library-oauth2-http" % "1.30.0",
   "com.gu" %% "simple-configuration-ssm" % "2.0.0",
   "org.slf4j" % "slf4j-simple" % "2.0.16",
   "com.github.jwt-scala" %% "jwt-core" % "10.0.1",
@@ -33,10 +33,10 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "2.0.16",
   "org.scalatest" %% "scalatest" % "3.2.19" % "test",
   "junit" % "junit" % "4.13.2",
-  "io.netty" % "netty-codec-http2" % "4.1.114.Final",
-  "io.netty" % "netty-handler-proxy" % "4.1.114.Final",
-  "io.netty" % "netty-resolver-dns" % "4.1.114.Final",
-  "io.netty" % "netty-transport-native-epoll" % "4.1.114.Final",
+  "io.netty" % "netty-codec-http2" % "4.1.115.Final",
+  "io.netty" % "netty-handler-proxy" % "4.1.115.Final",
+  "io.netty" % "netty-resolver-dns" % "4.1.115.Final",
+  "io.netty" % "netty-transport-native-epoll" % "4.1.115.Final",
   "com.fasterxml.jackson.core" % "jackson-core" % "2.18.1"
 )
 
