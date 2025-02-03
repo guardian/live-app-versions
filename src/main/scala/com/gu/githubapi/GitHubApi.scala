@@ -20,7 +20,7 @@ object GitHubApi {
   case class GitHubApiException(message: String) extends Throwable(message: String)
 
   case class Node(node: Deployment)
-  case class Deployment(databaseId: Int, environment: String, state: String, latestStatus: Option[LatestStatus], createdAt: ZonedDateTime)
+  case class Deployment(databaseId: Long, environment: String, state: String, latestStatus: Option[LatestStatus], createdAt: ZonedDateTime)
   case class LatestStatus(description: Option[String])
 
   val deploymentsDecoder = Decoder[List[Node]].prepare(
