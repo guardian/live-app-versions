@@ -6,7 +6,7 @@ import com.gu.githubapi.GitHubApi.Deployment
 
 object Conversion {
 
-  case class RunningLiveAppDeployment(version: String, environment: String, gitHubDatabaseId: Int, createdAt: ZonedDateTime)
+  case class RunningLiveAppDeployment(version: String, environment: String, gitHubDatabaseId: Long, createdAt: ZonedDateTime)
 
   def runningLiveAppDeployments(gitHubDeployments: List[Deployment]): List[RunningLiveAppDeployment] = {
     gitHubDeployments
