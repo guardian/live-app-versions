@@ -15,7 +15,7 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-val circeVersion = "0.14.12"
+val circeVersion = "0.14.13"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.782",
@@ -37,7 +37,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.0.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.0.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.0.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3"
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.19.0"
 )
 
 assemblyJarName := s"${name.value}.jar"
