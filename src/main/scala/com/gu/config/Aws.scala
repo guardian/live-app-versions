@@ -1,16 +1,16 @@
 package com.gu.config
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider }
-import com.amazonaws.regions.Regions
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain
+import software.amazon.awssdk.auth.credentials.{ EnvironmentVariableCredentialsProvider, ProfileCredentialsProvider }
+import software.amazon.awssdk.regions.Region
 
 object Aws {
 
-  val euWest1 = Regions.EU_WEST_1
+  val euWest1 = Region.EU_WEST_1
 
-  def credentials(profileName: String) = new AWSCredentialsProviderChain(
-    new ProfileCredentialsProvider(profileName), // Used when running locally
-    new EnvironmentVariableCredentialsProvider() // Used by AWS lambda
+  def credentials(profileName: String) = AwsCredentialsProviderChain.of(
+    ProfileCredentialsProvider.create(profileName), // Used when running locally
+    EnvironmentVariableCredentialsProvider.create() // Used by AWS lambda
   )
 
 }
