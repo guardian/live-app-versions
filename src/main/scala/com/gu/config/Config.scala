@@ -14,7 +14,8 @@ object Config {
     app = env.app,
     stack = env.stack,
     stage = env.stage,
-    region = Aws.euWest1.getName)
+    region = Aws.euWest1.id()
+  )
 
   case class Env(app: String, stack: String, stage: String) {
     override def toString: String = s"App: $app, Stack: $stack, Stage: $stage\n"
@@ -66,12 +67,13 @@ object Config {
   }
 
   case class ExternalTesterGroup(id: String, name: String)
-  case class ExternalTesterConfig(group1: ExternalTesterGroup,
-                                  group2: ExternalTesterGroup,
-                                  group3: ExternalTesterGroup,
-                                  group4: ExternalTesterGroup,
-                                  group5: ExternalTesterGroup,
-                                  group6: ExternalTesterGroup)
+  case class ExternalTesterConfig(
+    group1: ExternalTesterGroup,
+    group2: ExternalTesterGroup,
+    group3: ExternalTesterGroup,
+    group4: ExternalTesterGroup,
+    group5: ExternalTesterGroup,
+    group6: ExternalTesterGroup)
   val externalTesterConfigForProd = ExternalTesterConfig(
     ExternalTesterGroup("b3ee0d21-fe7e-487a-9f81-5ea993b6e860", "External Testers 1"),
     ExternalTesterGroup("53ab9951-d444-4107-87ce-dbfbb2c898e5", "External Testers 2"),
