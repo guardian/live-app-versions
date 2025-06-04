@@ -1,6 +1,6 @@
 package com.gu.liveappversions.android
 
-import com.amazonaws.services.s3.model.PutObjectResult
+import software.amazon.awssdk.services.s3.model.PutObjectResponse
 import com.gu.config.Config.Env
 import com.gu.liveappversions.S3Storage
 import com.gu.liveappversions.android.Lambda.{ logger, partialKey }
@@ -30,7 +30,7 @@ object Updates {
     }
   }
 
-  def performUpdates(updates: List[Option[VersionWithTracks]], env: Env, uploadBucketName: String): Try[List[PutObjectResult]] = {
+  def performUpdates(updates: List[Option[VersionWithTracks]], env: Env, uploadBucketName: String): Try[List[PutObjectResponse]] = {
 
     val toUpdate = updates.filter(_.isDefined)
 
