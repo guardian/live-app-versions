@@ -6,7 +6,6 @@ import com.gu.githubapi.GitHubApi.Deployment
 
 object Conversion {
 
-  // Common trait for all deployment types
   sealed trait LiveAppDeployment {
     def version: String
     def environment: String
@@ -18,7 +17,6 @@ object Conversion {
 
   case class FailedLiveAppDeployment(version: String, environment: String, gitHubDatabaseId: Long, createdAt: ZonedDateTime) extends LiveAppDeployment
 
-  // Generic method to convert GitHub deployments to our domain model
   private def convertDeployments[T <: LiveAppDeployment](gitHubDeployments: List[Deployment], state: String, constructor: (String, String, Long, ZonedDateTime) => T): List[T] = {
     gitHubDeployments
       .filter(deployment => deployment.state == state && deployment.latestStatus.flatMap(_.description).isDefined)
