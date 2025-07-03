@@ -2,7 +2,7 @@ package com.gu.githubapi
 
 import java.time.ZonedDateTime
 import com.gu.config.Config.GitHubConfig
-import com.gu.githubapi.Conversion.{LiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments}
+import com.gu.githubapi.Conversion.{LiveAppDeployment, runningLiveAppDeployments, failedLiveAppDeployments}
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
