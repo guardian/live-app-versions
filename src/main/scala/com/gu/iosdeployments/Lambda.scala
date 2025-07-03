@@ -83,6 +83,20 @@ object Lambda {
       Try(logger.info("No running production deployments found."))
   }
 
+  def markPreviouslyFailedProductionDeploymentAsSucccesful(maybeFailedProductionDeployment: Option[FailedLiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] = maybeFailedProductionDeployment match {
+    case Some(failedLiveAppDeployment) =>
+      val attemptToFindProductionVersion = latestProductionVersions.find(_.version == failedLiveAppDeployment.version)
+      attemptToFindProductionVersion match {
+        case Some(LiveAppProduction(_, _, "READY_FOR_SALE")) =>
+          logger.info(s"Production deployment for version ${failedLiveAppDeployment.version} was previously rejected. It is now marked as 'READY FOR SALE' and deployment is complete...")
+          GitHubApi.markPreviouslyFailedDeploymentAsSuccess(gitHubConfig, failedLiveAppDeployment)
+        case None =>
+          Try(logger.info(s"Found failed ${failedLiveAppDeployment.environment} deployment for version ${failedLiveAppDeployment.version}. Waiting to see if its status changes to READY_FOR_SALE on App Store Connect..."))
+      }
+    case None =>
+      Try(logger.info("No failed production deployments found."))
+  }
+
   def notPresentInAppStoreConnect(runningDeployment: RunningLiveAppDeployment, gitHubConfig: GitHubConfig) = {
 
     def olderThanOneHour(deployment: RunningLiveAppDeployment): Boolean = {
@@ -107,10 +121,13 @@ object Lambda {
     logger.info("Successfully loaded configuration...")
     val result = for {
       runningDeployments <- GitHubApi.getRunningDeployments(gitHubConfig)
+      failedDeployments <- GitHubApi.getFailedDeployments(gitHubConfig)
       appStoreConnectBetaBuilds <- AppStoreConnectApi.getLatestBetaBuilds(appStoreConnectToken, appStoreConnectConfig)
       appStoreConnectProductionBuild <- AppStoreConnectApi.getLatestProductionBuilds(appStoreConnectToken, appStoreConnectConfig)
       maybeBetaDeployment = runningDeployments.find(_.environment.contains("beta"))
       maybeProductionDeployment = runningDeployments.find(_.environment == "production")
+      maybeFailedProductionDeployment = failedDeployments.find(_.environment == "production")
+      handleFailedProductionDeploymentAsSuccessful <- markPreviouslyFailedProductionDeploymentAsSucccesful(maybeFailedProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
       handleBeta <- handleBetaDeployment(env, maybeBetaDeployment, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
       handleProduction <- handleProductionDeployment(maybeProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
     } yield {
