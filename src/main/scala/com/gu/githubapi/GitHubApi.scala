@@ -2,12 +2,12 @@ package com.gu.githubapi
 
 import java.time.ZonedDateTime
 import com.gu.config.Config.GitHubConfig
-import com.gu.githubapi.Conversion.{ FailedLiveAppDeployment, RunningLiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments }
+import com.gu.githubapi.Conversion.{LiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments}
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
 import io.circe.generic.auto._
-import okhttp3.{ MediaType, Request, RequestBody }
+import okhttp3.{MediaType, Request, RequestBody}
 
 import scala.util.Try
 
@@ -41,23 +41,7 @@ object GitHubApi {
       .build
   }
 
-  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[RunningLiveAppDeployment]] = {
-    val query =
-      """
-    |{
-    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, latestStatus { createdAt, description  } } } } } }"
-    |}
-    |""".stripMargin
-    for {
-      httpResponse <- Try(SharedClient.client.newCall(gitHubPostRequest(graphQlApiUrl, query, gitHubConfig)).execute)
-      bodyAsString <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
-      deployments <- extractDeployments(bodyAsString).toTry
-    } yield {
-      runningLiveAppDeployments(deployments)
-    }
-  }
-
-  def getFailedDeployments(gitHubConfig: GitHubConfig): Try[List[FailedLiveAppDeployment]] = {
+  def getDeployments(gitHubConfig: GitHubConfig, state: String): Try[List[LiveAppDeployment]] = {
     val query =
       """
         |{
@@ -69,23 +53,28 @@ object GitHubApi {
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
       deployments <- extractDeployments(bodyAsString).toTry
     } yield {
-      failedLiveAppDeployments(deployments)
+      if (state == "PENDING") runningLiveAppDeployments(deployments)
+      else failedLiveAppDeployments(deployments)
     }
   }
 
-  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[LiveAppDeployment]] = {
+    getDeployments(gitHubConfig, "PENDING")
+  }
+
+  def getFailedDeployments(gitHubConfig: GitHubConfig): Try[List[LiveAppDeployment]] = {
+    getDeployments(gitHubConfig, "FAILURE")
+  }
+
+  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment): Try[Unit] = {
     markDeploymentAsFinished(gitHubConfig, deployment, "success")
   }
 
-  def markPreviouslyFailedDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: FailedLiveAppDeployment): Try[Unit] = {
-    markPreviouslyFailedDeploymentAsFinished(gitHubConfig, deployment, "success")
-  }
-
-  def markDeploymentAsFailure(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+  def markDeploymentAsFailure(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment): Try[Unit] = {
     markDeploymentAsFinished(gitHubConfig, deployment, "failure")
   }
 
-  def markDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment, finishedState: String): Try[Unit] = {
+  def markDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment, finishedState: String): Try[Unit] = {
     val url = s"$restApiUrl/repos/guardian/ios-live/deployments/${deployment.gitHubDatabaseId.toString}/statuses"
     val body =
       s"""
@@ -101,22 +90,4 @@ object GitHubApi {
       ()
     }
   }
-
-  def markPreviouslyFailedDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: FailedLiveAppDeployment, finishedState: String): Try[Unit] = {
-    val url = s"$restApiUrl/repos/guardian/ios-live/deployments/${deployment.gitHubDatabaseId.toString}/statuses"
-    val body =
-      s"""
-         |{
-         |  "state": "$finishedState",
-         |  "description": "${deployment.version}"
-         |}
-         |""".stripMargin
-    for {
-      httpResponse <- Try(SharedClient.client.newCall(gitHubPostRequest(url, body, gitHubConfig)).execute)
-      _ <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
-    } yield {
-      ()
-    }
-  }
-
 }

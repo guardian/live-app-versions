@@ -1,17 +1,16 @@
 package com.gu.iosdeployments
 
 import java.time.ZonedDateTime
-
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction }
-import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
+import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
+import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
 import com.gu.config.Config
-import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
-import com.gu.githubapi.Conversion.RunningLiveAppDeployment
+import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
+import com.gu.githubapi.Conversion.LiveAppDeployment
 import com.gu.githubapi.GitHubApi
-import org.slf4j.{ Logger, LoggerFactory }
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 object Lambda {
 
@@ -23,7 +22,7 @@ object Lambda {
     process(env)
   }
 
-  def handleBetaDeployment(env: Env, maybeDeployment: Option[RunningLiveAppDeployment], latestBetas: List[LiveAppBeta], appStoreConnectToken: String, gitHubConfig: GitHubConfig): Try[Unit] = {
+  def handleBetaDeployment(env: Env, maybeDeployment: Option[LiveAppDeployment], latestBetas: List[LiveAppBeta], appStoreConnectToken: String, gitHubConfig: GitHubConfig): Try[Unit] = {
 
     val externalTesterConfig = if (env.stage == "PROD") {
       Config.externalTesterConfigForProd
@@ -63,7 +62,7 @@ object Lambda {
     }
   }
 
-  def handleProductionDeployment(maybeDeployment: Option[RunningLiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
+  def handleProductionDeployment(maybeDeployment: Option[LiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] = maybeDeployment match {
     case Some(productionDeployment) =>
       val attemptToFindProductionVersion = latestProductionVersions.find(_.version == productionDeployment.version)
       attemptToFindProductionVersion match {
@@ -83,23 +82,23 @@ object Lambda {
       Try(logger.info("No running production deployments found."))
   }
 
-  def markPreviouslyFailedProductionDeploymentAsSucccesful(maybeFailedProductionDeployment: Option[FailedLiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] = maybeFailedProductionDeployment match {
-    case Some(failedLiveAppDeployment) =>
-      val attemptToFindProductionVersion = latestProductionVersions.find(_.version == failedLiveAppDeployment.version)
-      attemptToFindProductionVersion match {
-        case Some(LiveAppProduction(_, _, "READY_FOR_SALE")) =>
-          logger.info(s"Production deployment for version ${failedLiveAppDeployment.version} was previously rejected. It is now marked as 'READY FOR SALE' and deployment is complete...")
-          GitHubApi.markPreviouslyFailedDeploymentAsSuccess(gitHubConfig, failedLiveAppDeployment)
-        case None =>
-          Try(logger.info(s"Found failed ${failedLiveAppDeployment.environment} deployment for version ${failedLiveAppDeployment.version}. Waiting to see if its status changes to READY_FOR_SALE on App Store Connect..."))
-      }
-    case None =>
-      Try(logger.info("No failed production deployments found."))
-  }
+  def handlePreviouslyFailedProductionDeployment(maybeFailedDeployment: Option[LiveAppDeployment], latestProductionVersions: List[LiveAppProduction], gitHubConfig: GitHubConfig): Try[Unit] =
+    maybeFailedDeployment match {
+      case Some(failedDeployment) =>
+        latestProductionVersions.find(_.version == failedDeployment.version) match {
+          case Some(LiveAppProduction(_, _, "READY_FOR_SALE")) =>
+            logger.info(s"Production deployment for version ${failedDeployment.version} was previously rejected. It is now marked as 'READY FOR SALE' and deployment is complete...")
+            GitHubApi.markDeploymentAsSuccess(gitHubConfig, failedDeployment)
+          case _ =>
+            Try(logger.info(s"Found failed ${failedDeployment.environment} deployment for version ${failedDeployment.version}. Waiting to see if its status changes to READY_FOR_SALE on App Store Connect..."))
+        }
+      case None =>
+        Try(logger.info("No failed production deployments found."))
+    }
 
-  def notPresentInAppStoreConnect(runningDeployment: RunningLiveAppDeployment, gitHubConfig: GitHubConfig) = {
+  def notPresentInAppStoreConnect(runningDeployment: LiveAppDeployment, gitHubConfig: GitHubConfig) = {
 
-    def olderThanOneHour(deployment: RunningLiveAppDeployment): Boolean = {
+    def olderThanOneHour(deployment: LiveAppDeployment): Boolean = {
       val oneHourAgo = ZonedDateTime.now().minusHours(1)
       deployment.createdAt.isBefore(oneHourAgo)
     }
@@ -127,7 +126,7 @@ object Lambda {
       maybeBetaDeployment = runningDeployments.find(_.environment.contains("beta"))
       maybeProductionDeployment = runningDeployments.find(_.environment == "production")
       maybeFailedProductionDeployment = failedDeployments.find(_.environment == "production")
-      handleFailedProductionDeploymentAsSuccessful <- markPreviouslyFailedProductionDeploymentAsSucccesful(maybeFailedProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
+      handleFailedProductionDeployment <- handlePreviouslyFailedProductionDeployment(maybeFailedProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
       handleBeta <- handleBetaDeployment(env, maybeBetaDeployment, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
       handleProduction <- handleProductionDeployment(maybeProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
     } yield {
