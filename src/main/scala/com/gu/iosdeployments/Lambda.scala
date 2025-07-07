@@ -125,12 +125,12 @@ object Lambda {
       appStoreConnectProductionBuild <- AppStoreConnectApi.getLatestProductionBuilds(appStoreConnectToken, appStoreConnectConfig)
       maybeBetaDeployment = runningDeployments.find(_.environment.contains("beta"))
       maybeProductionDeployment = runningDeployments.find(_.environment == "production")
-      maybeFailedProductionDeployment = failedDeployments.find(_.environment == "production")
-      handleFailedProductionDeployment <- handlePreviouslyFailedProductionDeployment(maybeFailedProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
       handleBeta <- handleBetaDeployment(env, maybeBetaDeployment, appStoreConnectBetaBuilds, appStoreConnectToken, gitHubConfig)
       handleProduction <- handleProductionDeployment(maybeProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
+      maybeFailedProductionDeployment = failedDeployments.find(_.environment == "production")
+      handleFailedProductionDeployment <- handlePreviouslyFailedProductionDeployment(maybeFailedProductionDeployment, appStoreConnectProductionBuild, gitHubConfig)
     } yield {
-      handleProduction
+      handleFailedProductionDeployment
     }
 
     result match {

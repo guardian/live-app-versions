@@ -2,7 +2,7 @@ package com.gu.githubapi
 
 import java.time.ZonedDateTime
 import com.gu.config.Config.GitHubConfig
-import com.gu.githubapi.Conversion.{LiveAppDeployment, runningLiveAppDeployments, failedLiveAppDeployments}
+import com.gu.githubapi.Conversion.{FailedLiveAppDeployment, LiveAppDeployment, RunningLiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments}
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
@@ -41,7 +41,7 @@ object GitHubApi {
       .build
   }
 
-  def getDeployments(gitHubConfig: GitHubConfig, state: String): Try[List[LiveAppDeployment]] = {
+  def getDeployments(gitHubConfig: GitHubConfig, state: String): Try[List[Deployment]] = {
     val query =
       """
         |{
@@ -53,17 +53,20 @@ object GitHubApi {
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
       deployments <- extractDeployments(bodyAsString).toTry
     } yield {
-      if (state == "PENDING") runningLiveAppDeployments(deployments)
-      else failedLiveAppDeployments(deployments)
+      deployments.filter(_.state == state)
     }
   }
 
-  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[LiveAppDeployment]] = {
-    getDeployments(gitHubConfig, "PENDING")
+  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[RunningLiveAppDeployment]] = for {
+    deployments <- getDeployments(gitHubConfig, "PENDING")
+  } yield {
+    runningLiveAppDeployments(deployments)
   }
 
-  def getFailedDeployments(gitHubConfig: GitHubConfig): Try[List[LiveAppDeployment]] = {
-    getDeployments(gitHubConfig, "FAILURE")
+  def getFailedDeployments(gitHubConfig: GitHubConfig): Try[List[FailedLiveAppDeployment]] = for {
+    deployments <- getDeployments(gitHubConfig, "FAILURE")
+  } yield {
+    failedLiveAppDeployments(deployments)
   }
 
   def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment): Try[Unit] = {

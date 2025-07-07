@@ -17,6 +17,13 @@ class ConversionTest extends AnyFunSuite {
     Some(LatestStatus(Some("12345"))),
     now)
 
+  val failedDeployment = Deployment(
+    123,
+    "production",
+    "FAILURE",
+    Some(LatestStatus(Some("12345"))),
+    now)
+
   test("runningLiveAppDeployments should collect pending deployments with version info") {
     val result = Conversion.runningLiveAppDeployments(List(deployment))
     val expected = List(RunningLiveAppDeployment("12345", "external-beta", 123, now))
@@ -38,4 +45,9 @@ class ConversionTest extends AnyFunSuite {
     assert(result == expected)
   }
 
+  test("failedLiveAppDeployments should collect failed deployments with version info") {
+    val result = Conversion.failedLiveAppDeployments(List(failedDeployment))
+    val expected = List(Conversion.FailedLiveAppDeployment("12345", "production", 123, now))
+    assert(result == expected)
+  }
 }
