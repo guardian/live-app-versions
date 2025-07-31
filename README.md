@@ -27,11 +27,9 @@ Note that this project now uses a github [workflow](.github/workflows/build.yml)
 
 ## Testing in CODE
 
-Enable the [rule](https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/default/rules/live-app-versions-CODE-PollingEvent-895CZLHBBP9C)
+1. Enable the [rule](https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/default/rules/live-app-versions-CODE-PollingEvent-895CZLHBBP9C)
 to poll the lambdas.
-
-Click on the targets tab to find a link to each of the lambdas.
-
-On the monitor tab on the lambda console, click view cloudwatch logs.
-
-Check for a successful invocation of the lambda when the schedule runs
+2. Click on the targets tab to find a link to each of the lambdas.
+3. On the monitor tab on the lambda console, click view cloudwatch logs.
+4. Check for a successful invocation of the lambda when the schedule runs.
+5. Make sure to turn off the rule promptly after testing (do not let it run for too long) as the CODE lambda hits the same endpoint that android uses to release the app. We have a daily quota for using this endpoint and android app releases will be affected if exceeded.
