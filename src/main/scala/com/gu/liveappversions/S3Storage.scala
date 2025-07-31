@@ -36,14 +36,7 @@ object S3Storage {
     metadata.setContentType("application/json")
     metadata.setCacheControl("max-age=60")
 
-    val accessControl = if (env.stage == "PROD") {
-      CannedAccessControlList.PublicRead
-    } else {
-      CannedAccessControlList.Private //It's preferable to avoid serving test files via https://mobile.guardianapis.com/
-    }
-
     val putObjectRequest = new PutObjectRequest(bucketName, key, buildAttributesStream, metadata)
-      .withCannedAcl(accessControl)
 
     Try(s3Client.putObject(putObjectRequest)) match {
       case Success(result) =>
