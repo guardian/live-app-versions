@@ -36,7 +36,7 @@ object S3Storage {
     metadata.setContentType("application/json")
     metadata.setCacheControl("max-age=60")
 
-    val accessControl = if (env.stage == "PROD") {
+    val accessControl = if (env.stage == "PROD" || env.stage == "CODE") {
       CannedAccessControlList.PublicRead
     } else {
       CannedAccessControlList.Private //It's preferable to avoid serving test files via https://mobile.guardianapis.com/
