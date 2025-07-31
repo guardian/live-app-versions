@@ -36,12 +36,7 @@ object S3Storage {
     metadata.setContentType("application/json")
     metadata.setCacheControl("max-age=60")
 
-    val putObjectRequest = if (env.stage == "PROD") {
-      new PutObjectRequest(bucketName, key, buildAttributesStream, metadata)
-        .withCannedAcl(CannedAccessControlList.PublicRead)
-    } else {
-      new PutObjectRequest(bucketName, key, buildAttributesStream, metadata)
-    }
+    val putObjectRequest = new PutObjectRequest(bucketName, key, buildAttributesStream, metadata)
 
     Try(s3Client.putObject(putObjectRequest)) match {
       case Success(result) =>
