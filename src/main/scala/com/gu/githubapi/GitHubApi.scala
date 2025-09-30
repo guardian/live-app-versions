@@ -2,12 +2,12 @@ package com.gu.githubapi
 
 import java.time.ZonedDateTime
 import com.gu.config.Config.GitHubConfig
-import com.gu.githubapi.Conversion.{FailedLiveAppDeployment, LiveAppDeployment, RunningLiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments}
+import com.gu.githubapi.Conversion.{ FailedLiveAppDeployment, LiveAppDeployment, RunningLiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments }
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
 import io.circe.generic.auto._
-import okhttp3.{MediaType, Request, RequestBody}
+import okhttp3.{ MediaType, Request, RequestBody }
 
 import scala.util.Try
 
@@ -36,7 +36,7 @@ object GitHubApi {
   def gitHubPostRequest(url: String, body: String, gitHubConfig: GitHubConfig): Request = {
     new Request.Builder()
       .url(url)
-      .addHeader("Authorization", s"token ${gitHubConfig.token}")
+      .addHeader("Authorization", s"Bearer ${gitHubConfig.token}")
       .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
       .build
   }

@@ -16,6 +16,7 @@ scalacOptions ++= Seq(
 )
 
 val circeVersion = "0.14.12"
+val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.12.783",
@@ -37,7 +38,11 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.0.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.0.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.0.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3"
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3",
+  "org.kohsuke" % "github-api" % "1.330",
+  "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
+  "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
+  "org.bouncycastle" % "bcpkix-jdk15on" % "1.70",
 )
 
 assemblyJarName := s"${name.value}.jar"
