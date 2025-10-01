@@ -157,7 +157,9 @@ object Config {
       val github = new GitHubBuilder().withJwtToken(jwt).build()
 
       // Get first, ie only, installation ID for the GitHub app
-      val installationId = github.getApp.listInstallations().toList.get(0).getId
+      val installationId = github.getApp.listInstallations().toList.headOption
+        .getOrElse(throw new NoSuchElementException("No installations found for the GitHub app"))
+        .getId
 
       val token = github.getApp
         .getInstallationById(installationId)
