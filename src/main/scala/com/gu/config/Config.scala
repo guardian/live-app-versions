@@ -2,10 +2,10 @@ package com.gu.config
 
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey
 import com.gu.AwsIdentity
-import com.gu.conf.{ConfigurationLoader, SSMConfigurationLocation}
+import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
 import io.jsonwebtoken.Jwts
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
-import org.bouncycastle.openssl.{PEMKeyPair, PEMParser}
+import org.bouncycastle.openssl.{ PEMKeyPair, PEMParser }
 import org.kohsuke.github.GHPermissionType.WRITE
 import org.kohsuke.github.GitHubBuilder
 import software.amazon.awssdk.auth.credentials.{
@@ -14,7 +14,7 @@ import software.amazon.awssdk.auth.credentials.{
   ProfileCredentialsProvider => ProfileCredentialsProviderV2
 }
 
-import java.io.{ByteArrayInputStream, StringReader}
+import java.io.{ ByteArrayInputStream, StringReader }
 import java.nio.charset.StandardCharsets
 import java.security.PrivateKey
 import java.time.Clock
@@ -106,17 +106,18 @@ object Config {
 
   case class GitHubConfig(token: String)
 
-  /** Generates a GitHub App installation token, which can be used just like a PAT to get access to GitHub resources.
-    * Its advantage is that it is short-lived and not tied to any user.
-    *
-    * Generating an installation token has three steps:
-    *  1. Use the app's client ID and private key to generate a JWT.
-    *  2. Look up the installation ID (assuming the app is only installed in one org).
-    *  3. Use the JWT and installation ID to generate a token.
-    *
-    * See
-    * [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation]]
-    */
+  /**
+   * Generates a GitHub App installation token, which can be used just like a PAT to get access to GitHub resources.
+   * Its advantage is that it is short-lived and not tied to any user.
+   *
+   * Generating an installation token has three steps:
+   *  1. Use the app's client ID and private key to generate a JWT.
+   *  2. Look up the installation ID (assuming the app is only installed in one org).
+   *  3. Use the JWT and installation ID to generate a token.
+   *
+   * See
+   * [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation]]
+   */
   object GitHubConfig {
     def apply(env: Env): GitHubConfig = {
       val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), CredentialsProvider.credentialsv2) {
@@ -130,7 +131,7 @@ object Config {
           val pemObject = pemParser.readObject()
           val keyPair = pemObject match {
             case kp: PEMKeyPair => kp
-            case _              => throw new IllegalArgumentException("Invalid PEM format")
+            case _ => throw new IllegalArgumentException("Invalid PEM format")
           }
           val converter = new JcaPEMKeyConverter()
           converter.getPrivateKey(keyPair.getPrivateKeyInfo)
@@ -158,7 +159,7 @@ object Config {
       val github = new GitHubBuilder().withJwtToken(jwt).build()
 
       // Get first, ie only, installation ID for the GitHub app
-      val installationId = github.getApp.listInstallations().toList.headOption
+      val installationId = github.getApp.listInstallations().toList.asScala.headOption
         .getOrElse(throw new NoSuchElementException("No installations found for the GitHub app"))
         .getId
 
