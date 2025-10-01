@@ -109,9 +109,10 @@ object Config {
   /** Generates a GitHub App installation token, which can be used just like a PAT to get access to GitHub resources.
     * Its advantage is that it is short-lived and not tied to any user.
     *
-    * Generating an installation token has three steps: <ol> <li>Use the app's client ID and private key to generate a
-    * jwt.</li> <li>Look up the installation ID (assuming the app is only installed in one org).</li> <li>Use the jwt
-    * and installation ID to generate a token.</li> </ol>
+    * Generating an installation token has three steps:
+    *  1. Use the app's client ID and private key to generate a JWT.
+    *  2. Look up the installation ID (assuming the app is only installed in one org).
+    *  3. Use the JWT and installation ID to generate a token.
     *
     * See
     * [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation]]
