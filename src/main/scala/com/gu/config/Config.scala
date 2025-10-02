@@ -1,12 +1,28 @@
 package com.gu.config
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
-
+import com.eatthepath.pushy.apns.auth.ApnsSigningKey
 import com.gu.AwsIdentity
 import com.gu.conf.{ ConfigurationLoader, SSMConfigurationLocation }
-import com.eatthepath.pushy.apns.auth.ApnsSigningKey
-import software.amazon.awssdk.auth.credentials.{ AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, DefaultCredentialsProvider => DefaultCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
+import io.jsonwebtoken.Jwts
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
+import org.bouncycastle.openssl.{ PEMKeyPair, PEMParser }
+import org.kohsuke.github.GHPermissionType.WRITE
+import org.kohsuke.github.GitHubBuilder
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
+  DefaultCredentialsProvider => DefaultCredentialsProviderV2,
+  ProfileCredentialsProvider => ProfileCredentialsProviderV2
+}
+
+import java.io.{ ByteArrayInputStream, StringReader }
+import java.nio.charset.StandardCharsets
+import java.security.PrivateKey
+import java.time.Clock
+import java.time.Clock.systemUTC
+import java.time.Duration.ofMinutes
+import java.util.Date
+import scala.jdk.CollectionConverters._
+import scala.util.Using
 
 object Config {
 
@@ -66,12 +82,13 @@ object Config {
   }
 
   case class ExternalTesterGroup(id: String, name: String)
-  case class ExternalTesterConfig(group1: ExternalTesterGroup,
-                                  group2: ExternalTesterGroup,
-                                  group3: ExternalTesterGroup,
-                                  group4: ExternalTesterGroup,
-                                  group5: ExternalTesterGroup,
-                                  group6: ExternalTesterGroup)
+  case class ExternalTesterConfig(
+    group1: ExternalTesterGroup,
+    group2: ExternalTesterGroup,
+    group3: ExternalTesterGroup,
+    group4: ExternalTesterGroup,
+    group5: ExternalTesterGroup,
+    group6: ExternalTesterGroup)
   val externalTesterConfigForProd = ExternalTesterConfig(
     ExternalTesterGroup("b3ee0d21-fe7e-487a-9f81-5ea993b6e860", "External Testers 1"),
     ExternalTesterGroup("53ab9951-d444-4107-87ce-dbfbb2c898e5", "External Testers 2"),
@@ -89,12 +106,71 @@ object Config {
 
   case class GitHubConfig(token: String)
 
+  /**
+   * Generates a GitHub App installation token, which can be used just like a PAT to get access to GitHub resources.
+   * Its advantage is that it is short-lived and not tied to any user.
+   *
+   * Generating an installation token has three steps:
+   *  1. Use the app's client ID and private key to generate a JWT.
+   *  2. Look up the installation ID (assuming the app is only installed in one org).
+   *  3. Use the JWT and installation ID to generate a token.
+   *
+   * See
+   * [[https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation]]
+   */
   object GitHubConfig {
     def apply(env: Env): GitHubConfig = {
       val ssmPrivateConfig = ConfigurationLoader.load(setupAppIdentity(env), CredentialsProvider.credentialsv2) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
-      val token = ssmPrivateConfig.getString("github.token")
+
+      // Read GitHub App private key from a PEM string.
+      def readPrivateKey(pem: String): PrivateKey =
+        Using.resource(new StringReader(pem)) { reader =>
+          val pemParser = new PEMParser(reader)
+          val pemObject = pemParser.readObject()
+          val keyPair = pemObject match {
+            case kp: PEMKeyPair => kp
+            case _ => throw new IllegalArgumentException("Invalid PEM format")
+          }
+          val converter = new JcaPEMKeyConverter()
+          converter.getPrivateKey(keyPair.getPrivateKeyInfo)
+        }
+
+      // See https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
+      def generateJwt(appClientId: String, privateKey: PrivateKey)(implicit clock: Clock = systemUTC()): String = {
+        val now = clock.instant()
+        Jwts
+          .builder()
+          .issuer(appClientId)
+          // To protect against clock drift
+          .issuedAt(Date.from(now.minusSeconds(60)))
+          // Max TTL GitHub will allow
+          .expiration(Date.from(now.plus(ofMinutes(10))))
+          .signWith(privateKey)
+          .compact()
+      }
+
+      val appClientId = ssmPrivateConfig.getString("github.app.clientId")
+      val appPrivateKeyString = ssmPrivateConfig.getString("github.app.privateKey")
+
+      val appPrivateKey = readPrivateKey(appPrivateKeyString)
+      val jwt = generateJwt(appClientId, appPrivateKey)
+      val github = new GitHubBuilder().withJwtToken(jwt).build()
+
+      // Get first, ie only, installation ID for the GitHub app
+      val installationId = github.getApp.listInstallations().toList.asScala.headOption
+        .getOrElse(throw new NoSuchElementException("No installations found for the GitHub app"))
+        .getId
+
+      val token = github.getApp
+        .getInstallationById(installationId)
+        .createToken()
+        .repositories(List("ios-live").asJava)
+        .permissions(Map("deployments" -> WRITE).asJava)
+        .create()
+        .getToken
+
       GitHubConfig(token)
     }
   }
