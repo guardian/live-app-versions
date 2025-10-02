@@ -15,7 +15,7 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-val circeVersion = "0.14.12"
+val circeVersion = "0.14.15"
 val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
