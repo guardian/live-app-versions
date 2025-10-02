@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.19" % "test",
   "junit" % "junit" % "4.13.2",
   "io.netty" % "netty-codec-http2" % "4.2.6.Final",
-  "io.netty" % "netty-handler-proxy" % "4.2.0.Final",
+  "io.netty" % "netty-handler-proxy" % "4.2.6.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.0.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.0.Final",
   "com.fasterxml.jackson.core" % "jackson-core" % "2.18.4.1",
