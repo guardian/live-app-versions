@@ -30,7 +30,7 @@ object Config {
     app = env.app,
     stack = env.stack,
     stage = env.stage,
-    region = Aws.euWest1.getName)
+    region = Aws.euWest1.id())
 
   case class Env(app: String, stack: String, stage: String) {
     override def toString: String = s"App: $app, Stack: $stack, Stage: $stage\n"

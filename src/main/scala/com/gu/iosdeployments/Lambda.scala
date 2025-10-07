@@ -2,15 +2,15 @@ package com.gu.iosdeployments
 
 import java.time.ZonedDateTime
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.appstoreconnectapi.Conversion.{LiveAppBeta, LiveAppProduction}
-import com.gu.appstoreconnectapi.{AppStoreConnectApi, JwtTokenBuilder}
+import com.gu.appstoreconnectapi.Conversion.{ LiveAppBeta, LiveAppProduction }
+import com.gu.appstoreconnectapi.{ AppStoreConnectApi, JwtTokenBuilder }
 import com.gu.config.Config
-import com.gu.config.Config.{AppStoreConnectConfig, Env, GitHubConfig}
+import com.gu.config.Config.{ AppStoreConnectConfig, Env, GitHubConfig }
 import com.gu.githubapi.Conversion.LiveAppDeployment
 import com.gu.githubapi.GitHubApi
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.{ Logger, LoggerFactory }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object Lambda {
 

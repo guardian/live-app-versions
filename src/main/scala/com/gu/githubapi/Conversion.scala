@@ -24,8 +24,7 @@ object Conversion {
         deployment.latestStatus.get.description.get,
         deployment.environment,
         deployment.databaseId,
-        deployment.createdAt
-      ))
+        deployment.createdAt))
   }
 
   def runningLiveAppDeployments(gitHubDeployments: List[Deployment]): List[RunningLiveAppDeployment] = {
