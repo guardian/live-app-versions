@@ -13,8 +13,11 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  # Required by actions-riff-raff
   id-token: write
   contents: read
+  # Required by actions-riff-raff to add comment to PR
+  pull-requests: write
 
 jobs:
   build:
@@ -25,17 +28,14 @@ jobs:
       - name: Setup JDK and sbt
         uses: guardian/setup-scala@v1
 
-      - uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-
       - name: Clean, compile and test
         run: sbt clean compile test assembly
 
       - name: Upload to riff-raff
-        uses: guardian/actions-riff-raff@v2
+        uses: guardian/actions-riff-raff@v4
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           app: live-app-versions
           buildNumberOffset: 172
           configPath: riff-raff.yaml

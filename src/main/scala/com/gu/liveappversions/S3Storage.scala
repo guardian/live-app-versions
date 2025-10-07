@@ -42,10 +42,9 @@ object S3Storage {
       .acl(accessControl)
       .build()
 
-    Try {
-      val requestBody = RequestBody.fromInputStream(stream, bytes.length)
-      s3Client.putObject(putRequest, requestBody)
-    } match {
+    val requestBody = RequestBody.fromInputStream(stream, bytes.length)
+
+    Try(s3Client.putObject(putRequest, requestBody)) match {
       case Success(result) =>
         logger.info(s"Successfully uploaded new build info to S3 (bucket: $bucketName | key: $key)")
         stream.close()
@@ -67,11 +66,9 @@ object S3Storage {
 
     Try {
       val inputStream = s3Client.getObject(getRequest)
-      try {
-        Source.fromInputStream(inputStream).mkString
-      } finally {
-        inputStream.close()
-      }
+      val result = Source.fromInputStream(inputStream).mkString
+      inputStream.close()
+      result
     } match {
       case Success(result) =>
         logger.info(s"Successfully downloaded file from S3 (bucket: $bucketName | key: $key)")

@@ -16,12 +16,13 @@ scalacOptions ++= Seq(
 )
 
 val circeVersion = "0.14.12"
+val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "s3" % "2.31.24",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.3",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
-  "com.gu" %% "simple-configuration-ssm" % "5.1.1",
+  "com.gu" %% "simple-configuration-ssm" % "5.1.2",
   "com.google.auth" % "google-auth-library-oauth2-http" % "1.33.1",
   "org.slf4j" % "slf4j-simple" % "2.0.17",
   "com.github.jwt-scala" %% "jwt-core" % "10.0.4",
@@ -37,7 +38,11 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.0.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.0.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.0.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3"
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3",
+  "org.kohsuke" % "github-api" % "1.330",
+  "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
+  "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
+  "org.bouncycastle" % "bcpkix-jdk15on" % "1.70",
 )
 
 assemblyJarName := s"${name.value}.jar"

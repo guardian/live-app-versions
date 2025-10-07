@@ -1,9 +1,8 @@
 package com.gu.githubapi
 
 import java.time.ZonedDateTime
-
 import com.gu.config.Config.GitHubConfig
-import com.gu.githubapi.Conversion.{ RunningLiveAppDeployment, runningLiveAppDeployments }
+import com.gu.githubapi.Conversion.{ FailedLiveAppDeployment, LiveAppDeployment, RunningLiveAppDeployment, failedLiveAppDeployments, runningLiveAppDeployments }
 import com.gu.okhttp.SharedClient
 import io.circe.Decoder
 import io.circe.parser._
@@ -37,36 +36,48 @@ object GitHubApi {
   def gitHubPostRequest(url: String, body: String, gitHubConfig: GitHubConfig): Request = {
     new Request.Builder()
       .url(url)
-      .addHeader("Authorization", s"token ${gitHubConfig.token}")
+      .addHeader("Authorization", s"Bearer ${gitHubConfig.token}")
       .post(RequestBody.create(body, MediaType.get("application/json; charset=utf-8")))
       .build
   }
 
-  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[RunningLiveAppDeployment]] = {
+  def getDeployments(gitHubConfig: GitHubConfig, state: String): Try[List[Deployment]] = {
     val query =
       """
-    |{
-    |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, latestStatus { createdAt, description  } } } } } }"
-    |}
-    |""".stripMargin
+        |{
+        |	"query": "query { repository(owner:\"guardian\", name:\"ios-live\") { deployments(last: 10) { edges { node { databaseId, createdAt, environment, state, latestStatus { createdAt, description  } } } } } }"
+        |}
+        |""".stripMargin
     for {
       httpResponse <- Try(SharedClient.client.newCall(gitHubPostRequest(graphQlApiUrl, query, gitHubConfig)).execute)
       bodyAsString <- SharedClient.getResponseBodyIfSuccessful("GitHub API", httpResponse)
       deployments <- extractDeployments(bodyAsString).toTry
     } yield {
-      runningLiveAppDeployments(deployments)
+      deployments.filter(_.state == state)
     }
   }
 
-  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+  def getRunningDeployments(gitHubConfig: GitHubConfig): Try[List[RunningLiveAppDeployment]] = for {
+    deployments <- getDeployments(gitHubConfig, "PENDING")
+  } yield {
+    runningLiveAppDeployments(deployments)
+  }
+
+  def getFailedDeployments(gitHubConfig: GitHubConfig): Try[List[FailedLiveAppDeployment]] = for {
+    deployments <- getDeployments(gitHubConfig, "FAILURE")
+  } yield {
+    failedLiveAppDeployments(deployments)
+  }
+
+  def markDeploymentAsSuccess(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment): Try[Unit] = {
     markDeploymentAsFinished(gitHubConfig, deployment, "success")
   }
 
-  def markDeploymentAsFailure(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment): Try[Unit] = {
+  def markDeploymentAsFailure(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment): Try[Unit] = {
     markDeploymentAsFinished(gitHubConfig, deployment, "failure")
   }
 
-  def markDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: RunningLiveAppDeployment, finishedState: String): Try[Unit] = {
+  def markDeploymentAsFinished(gitHubConfig: GitHubConfig, deployment: LiveAppDeployment, finishedState: String): Try[Unit] = {
     val url = s"$restApiUrl/repos/guardian/ios-live/deployments/${deployment.gitHubDatabaseId.toString}/statuses"
     val body =
       s"""
@@ -82,5 +93,4 @@ object GitHubApi {
       ()
     }
   }
-
 }
