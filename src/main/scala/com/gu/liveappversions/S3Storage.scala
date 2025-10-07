@@ -1,17 +1,15 @@
 package com.gu.liveappversions
 
-import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 import software.amazon.awssdk.core.ResponseInputStream
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.{ GetObjectRequest, GetObjectResponse, ObjectCannedACL, PutObjectRequest, PutObjectResponse, S3Exception }
+import software.amazon.awssdk.services.s3.model.{ GetObjectRequest, GetObjectResponse, PutObjectRequest, PutObjectResponse, S3Exception }
 import com.gu.config.Aws
 import com.gu.config.Config.Env
 import com.gu.liveappversions.ios.Lambda.logger
 import io.circe.Json
-import io.circe.syntax._
 
 import scala.io.Source
 import scala.util.{ Failure, Success, Try, Using }
