@@ -19,7 +19,7 @@ val circeVersion = "0.14.12"
 val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
-  "software.amazon.awssdk" % "s3" % "2.31.24",
+  "software.amazon.awssdk" % "s3" % "2.31.78",
   "com.amazonaws" % "aws-lambda-java-core" % "1.4.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
   "com.gu" %% "simple-configuration-ssm" % "5.1.2",
