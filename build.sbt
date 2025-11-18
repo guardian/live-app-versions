@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
   "org.kohsuke" % "github-api" % "1.330",
   "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
   "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
-  "org.bouncycastle" % "bcpkix-jdk15on" % "1.70",
+  "org.bouncycastle" % "bcpkix-jdk18on" % "1.82",
 )
 
 assemblyJarName := s"${name.value}.jar"
