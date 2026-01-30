@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % "1.3.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
   "com.gu" %% "simple-configuration-ssm" % "5.1.2",
-  "com.google.auth" % "google-auth-library-oauth2-http" % "1.33.1",
+  "com.google.auth" % "google-auth-library-oauth2-http" % "1.42.1",
   "org.slf4j" % "slf4j-simple" % "2.0.17",
   "com.github.jwt-scala" %% "jwt-core" % "10.0.4",
   "com.squareup.okhttp3" % "okhttp" % "4.12.0",
