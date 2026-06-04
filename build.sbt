@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % "2.0.17",
   "com.github.jwt-scala" %% "jwt-core" % "10.0.4",
   "com.squareup.okhttp3" % "okhttp" % "4.12.0",
-  "com.eatthepath" % "pushy" % "0.15.4",
+  "com.eatthepath" % "pushy" % "0.15.6",
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
