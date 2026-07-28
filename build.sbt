@@ -19,8 +19,8 @@ val circeVersion = "0.14.12"
 val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
-  "software.amazon.awssdk" % "s3" % "2.31.24",
-  "com.amazonaws" % "aws-lambda-java-core" % "1.3.0",
+  "software.amazon.awssdk" % "s3" % "2.31.78",
+  "com.amazonaws" % "aws-lambda-java-core" % "1.4.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
   "com.gu" %% "simple-configuration-ssm" % "5.1.2",
   "com.google.auth" % "google-auth-library-oauth2-http" % "1.33.1",
@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.10.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.10.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.10.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.3",
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.9",
   "org.kohsuke" % "github-api" % "1.330",
   "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
   "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
