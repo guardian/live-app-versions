@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.17.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.17.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.17.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.9",
+  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.11",
   "org.kohsuke" % "github-api" % "1.330",
   "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
   "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
