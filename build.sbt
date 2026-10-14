@@ -6,7 +6,7 @@ description:= "Lambda function which retrieves the latest beta version from App 
 
 version := "1.0"
 
-scalaVersion := "2.13.16"
+scalaVersion := "2.13.18"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -15,11 +15,11 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-val circeVersion = "0.14.12"
+val circeVersion = "0.14.17"
 val jjwtVersion = "0.13.0"
 
 libraryDependencies ++= Seq(
-  "software.amazon.awssdk" % "s3" % "2.31.78",
+  "software.amazon.awssdk" % "s3" % "2.55.15",
   "com.amazonaws" % "aws-lambda-java-core" % "1.4.0",
   "com.amazonaws" % "aws-lambda-java-log4j2" % "1.5.1",
   "com.gu" %% "simple-configuration-ssm" % "5.1.2",
@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "io.netty" % "netty-handler-proxy" % "4.2.17.Final",
   "io.netty" % "netty-resolver-dns" % "4.2.17.Final",
   "io.netty" % "netty-transport-native-epoll" % "4.2.17.Final",
-  "com.fasterxml.jackson.core" % "jackson-core" % "2.18.9",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.21.7",
   "org.kohsuke" % "github-api" % "1.330",
   "io.jsonwebtoken" % "jjwt-impl" % jjwtVersion,
   "io.jsonwebtoken" % "jjwt-jackson" % jjwtVersion % Runtime,
